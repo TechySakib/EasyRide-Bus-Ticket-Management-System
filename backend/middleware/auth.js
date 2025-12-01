@@ -1,21 +1,31 @@
+/**
+ * Auth Middleware
+ * Handles JWT token verification using Supabase Auth.
+ * @module middleware/auth
+ */
+
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
-
-
-
-
-
-
-
 
 const supabaseUrl = process.env.SUPABASE_URL || 'https://arctidbknjjajstoitas.supabase.co';
 const supabaseKey = process.env.SUPABASE_ANON_KEY || 'sb_publishable_Qpg550_nF9GVcZA4CejHgA_79GIdXvk';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+/**
+ * Middleware to authenticate requests using Bearer token.
+ * Verifies the token with Supabase and attaches the user to the request object.
+ * 
+ * @async
+ * @function authMiddleware
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ * @returns {Promise<void>} Calls next() if authenticated, or sends 401/500 response
+ */
 const authMiddleware = async (req, res, next) => {
     try {
-        
+
         const authHeader = req.headers.authorization;
 
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -24,7 +34,7 @@ const authMiddleware = async (req, res, next) => {
 
         const token = authHeader.split(' ')[1];
 
-        
+
         const { data: { user }, error } = await supabase.auth.getUser(token);
 
         if (error || !user) {
@@ -32,7 +42,7 @@ const authMiddleware = async (req, res, next) => {
             return res.status(401).json({ error: 'Invalid or expired token' });
         }
 
-        
+
         req.user = user;
         next();
     } catch (err) {

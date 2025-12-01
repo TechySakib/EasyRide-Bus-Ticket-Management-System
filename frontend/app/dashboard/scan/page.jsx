@@ -1,86 +1,170 @@
 "use client"
 
+
 import { useState } from "react"
+import { useRouter } from "next/navigation"
+import DashboardHeader from "@/components/DashboardHeader"
 import QRScanner from "@/components/admin/QRScanner"
 import { Card } from "@/components/ui/card"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { CheckCircle2, XCircle, Loader2 } from "lucide-react"
+import { AlertCircle, CheckCircle2, XCircle } from "lucide-react"
+import { supabase } from "@/lib/supabase"
 
+/**
+ * Scan Page Component
+ * The page for scanning QR codes.
+ * 
+ * @component
+ * @returns {JSX.Element} The rendered scan page
+ */
 export default function ScanPage() {
-    const [validationResult, setValidationResult] = useState(null)
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState(null)
+    const router = useRouter()
+    const [scanResult, setScanResult] = useState(null)
+    const [validationStatus, setValidationStatus] = useState(null) // 'success', 'error', 'loading'
+    const [ticketDetails, setTicketDetails] = useState(null)
+    const [errorMessage, setErrorMessage] = useState("")
 
-    const handleScan = async (data) => {
-        setLoading(true)
-        setError(null)
-        setValidationResult(null)
+    const handleScan = async (decodedText) => {
+        if (validationStatus === 'loading' || validationStatus === 'success') return
+
+        setScanResult(decodedText)
+        setValidationStatus('loading')
+        setErrorMessage("")
 
         try {
-            const response = await fetch("http://localhost:5000/api/tickets/validate", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ qr_code_data: data }),
-            })
+            const { data: { session } } = await supabase.auth.getSession()
 
-            const result = await response.json()
-
-            if (!response.ok) {
-                throw new Error(result.message || "Failed to validate ticket")
+            if (!session) {
+                setValidationStatus('error')
+                setErrorMessage("You must be logged in to scan tickets.")
+                return
             }
 
-            setValidationResult(result)
-        } catch (err) {
-            setError(err.message)
-        } finally {
-            setLoading(false)
+            // Call the backend API to validate the ticket
+            const response = await fetch('http://localhost:5000/api/tickets/validate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`
+                },
+                body: JSON.stringify({ qrCode: decodedText })
+            })
+
+            const data = await response.json()
+
+            if (!response.ok) {
+                throw new Error(data.message || "Invalid ticket")
+            }
+
+            setValidationStatus('success')
+            setTicketDetails(data.ticket)
+
+        } catch (error) {
+            console.error("Validation error:", error)
+            setValidationStatus('error')
+            setErrorMessage(error.message || "Failed to validate ticket")
         }
     }
 
+    const resetScanner = () => {
+        setScanResult(null)
+        setValidationStatus(null)
+        setTicketDetails(null)
+        setErrorMessage("")
+        window.location.reload()
+    }
+
     return (
-        <div className="container mx-auto p-6 max-w-2xl">
-            <h1 className="text-3xl font-bold mb-8 text-center">Ticket Scanner</h1>
+        <div className="min-h-screen bg-slate-50 font-sans">
+            <DashboardHeader />
 
-            <div className="mb-8">
-                <QRScanner onScan={handleScan} />
-            </div>
-
-            {loading && (
-                <div className="flex justify-center items-center p-8">
-                    <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-                    <span className="ml-2 text-gray-600">Validating ticket...</span>
-                </div>
-            )}
-
-            {error && (
-                <Alert variant="destructive" className="mb-6 bg-red-50 border-red-200">
-                    <XCircle className="h-4 w-4 text-red-600" />
-                    <AlertTitle className="text-red-800 font-semibold">Invalid Ticket</AlertTitle>
-                    <AlertDescription className="text-red-700">
-                        {error}
-                    </AlertDescription>
-                </Alert>
-            )}
-
-            {validationResult && (
-                <Card className="p-6 bg-green-50 border-green-200">
-                    <div className="flex items-start gap-4">
-                        <CheckCircle2 className="w-8 h-8 text-green-600 flex-shrink-0" />
-                        <div>
-                            <h3 className="text-xl font-bold text-green-800 mb-2">Ticket Validated!</h3>
-                            <div className="space-y-2 text-green-900">
-                                <p><span className="font-semibold">Passenger:</span> {validationResult.passenger_name}</p>
-                                <p><span className="font-semibold">Route:</span> {validationResult.route_name}</p>
-                                <p><span className="font-semibold">Bus:</span> {validationResult.bus_number}</p>
-                                <p><span className="font-semibold">Seat:</span> {validationResult.seat_number}</p>
-                                <p><span className="font-semibold">Journey Date:</span> {new Date(validationResult.journey_date).toLocaleDateString()}</p>
-                            </div>
-                        </div>
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="max-w-md mx-auto">
+                    <div className="text-center mb-8">
+                        <h1 className="text-3xl font-bold text-gray-900">Ticket Scanner</h1>
+                        <p className="text-gray-500 mt-2">Scan passenger QR codes to validate tickets</p>
                     </div>
-                </Card>
-            )}
+
+                    {!validationStatus && (
+                        <QRScanner onScan={handleScan} />
+                    )}
+
+                    {validationStatus === 'loading' && (
+                        <Card className="p-8 text-center">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                            <p className="text-lg font-medium text-gray-900">Validating Ticket...</p>
+                        </Card>
+                    )}
+
+                    {validationStatus === 'success' && ticketDetails && (
+                        <Card className="p-6 bg-green-50 border-green-200">
+                            <div className="text-center mb-6">
+                                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
+                                    <CheckCircle2 className="w-8 h-8 text-green-600" />
+                                </div>
+                                <h2 className="text-2xl font-bold text-green-700">Valid Ticket</h2>
+                                <p className="text-green-600">Ticket has been successfully verified</p>
+                            </div>
+
+                            <div className="space-y-4 bg-white p-4 rounded-lg border border-green-100">
+                                <div>
+                                    <p className="text-sm text-gray-500">Passenger</p>
+                                    <p className="font-semibold text-gray-900">{ticketDetails.passenger_name}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-500">Route</p>
+                                    <p className="font-semibold text-gray-900">{ticketDetails.route_name}</p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p className="text-sm text-gray-500">Date</p>
+                                        <p className="font-semibold text-gray-900">
+                                            {new Date(ticketDetails.booking_date).toLocaleDateString()}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Time</p>
+                                        <p className="font-semibold text-gray-900">
+                                            {ticketDetails.departure_time}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-500">Status</p>
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        {ticketDetails.status}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={resetScanner}
+                                className="w-full mt-6 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors"
+                            >
+                                Scan Next Ticket
+                            </button>
+                        </Card>
+                    )}
+
+                    {validationStatus === 'error' && (
+                        <Card className="p-6 bg-red-50 border-red-200">
+                            <div className="text-center mb-6">
+                                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
+                                    <XCircle className="w-8 h-8 text-red-600" />
+                                </div>
+                                <h2 className="text-2xl font-bold text-red-700">Invalid Ticket</h2>
+                                <p className="text-red-600">{errorMessage}</p>
+                            </div>
+
+                            <button
+                                onClick={resetScanner}
+                                className="w-full mt-6 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors"
+                            >
+                                Try Again
+                            </button>
+                        </Card>
+                    )}
+                </div>
+            </main>
         </div>
     )
 }

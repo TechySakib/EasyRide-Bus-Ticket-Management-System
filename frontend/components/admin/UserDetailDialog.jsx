@@ -22,6 +22,19 @@ import {
 import { supabase } from "@/lib/supabase"
 import { getRoleLabel, getRoleColor, isAdmin } from "@/lib/roles"
 
+/**
+ * User Detail Dialog Component
+ * Displays detailed information about a specific user.
+ * Allows admins to update the user's role.
+ * 
+ * @component
+ * @param {Object} props - Component props
+ * @param {boolean} props.isOpen - Controls the visibility of the dialog
+ * @param {Function} props.onClose - Callback function to close the dialog
+ * @param {Object} props.user - The user object to display details for
+ * @param {Function} [props.onUserUpdated] - Callback function called after user details are updated
+ * @returns {JSX.Element|null} The rendered dialog or null if not open or no user provided
+ */
 export default function UserDetailDialog({ isOpen, onClose, user, onUserUpdated }) {
     const [isEditingRole, setIsEditingRole] = useState(false)
     const [selectedRole, setSelectedRole] = useState(user?.role || 'passenger')
@@ -85,12 +98,12 @@ export default function UserDetailDialog({ isOpen, onClose, user, onUserUpdated 
             setSuccess('Role updated successfully!')
             setIsEditingRole(false)
 
-            
+
             if (onUserUpdated) {
                 onUserUpdated()
             }
 
-            
+
             setTimeout(() => {
                 setSuccess(null)
                 onClose()
@@ -135,19 +148,19 @@ export default function UserDetailDialog({ isOpen, onClose, user, onUserUpdated 
 
     return (
         <>
-            {}
+            { }
             <div
                 className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 animate-fadeIn"
                 onClick={onClose}
             />
 
-            {}
+            { }
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
                 <div
                     className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col pointer-events-auto animate-slideUp overflow-hidden"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    {}
+                    { }
                     <div className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 p-8 text-white">
                         <button
                             onClick={onClose}
@@ -169,7 +182,7 @@ export default function UserDetailDialog({ isOpen, onClose, user, onUserUpdated 
                             </div>
                         </div>
 
-                        {}
+                        { }
                         <div className="mt-4">
                             {isEditingRole && isCurrentUserAdmin ? (
                                 <div className="flex items-center gap-2">
@@ -222,9 +235,9 @@ export default function UserDetailDialog({ isOpen, onClose, user, onUserUpdated 
                         </div>
                     </div>
 
-                    {}
+                    { }
                     <div className="flex-1 overflow-auto p-8">
-                        {}
+                        { }
                         {error && (
                             <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
                                 {error}
@@ -235,9 +248,9 @@ export default function UserDetailDialog({ isOpen, onClose, user, onUserUpdated 
                                 {success}
                             </div>
                         )}
-                        {}
+                        { }
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {}
+                            { }
                             <InfoSection title="Contact Information">
                                 <InfoItem
                                     icon={<Mail className="h-5 w-5 text-blue-600" />}
@@ -251,7 +264,7 @@ export default function UserDetailDialog({ isOpen, onClose, user, onUserUpdated 
                                 />
                             </InfoSection>
 
-                            {}
+                            { }
                             <InfoSection title="Account Information">
                                 <InfoItem
                                     icon={<Hash className="h-5 w-5 text-purple-600" />}
@@ -273,7 +286,7 @@ export default function UserDetailDialog({ isOpen, onClose, user, onUserUpdated 
                                 />
                             </InfoSection>
 
-                            {}
+                            { }
                             <InfoSection title="Activity">
                                 <InfoItem
                                     icon={<Calendar className="h-5 w-5 text-indigo-600" />}
@@ -287,7 +300,7 @@ export default function UserDetailDialog({ isOpen, onClose, user, onUserUpdated 
                                 />
                             </InfoSection>
 
-                            {}
+                            { }
                             <InfoSection title="Status">
                                 <InfoItem
                                     icon={user.email_confirmed_at ?
@@ -310,7 +323,7 @@ export default function UserDetailDialog({ isOpen, onClose, user, onUserUpdated 
                             </InfoSection>
                         </div>
 
-                        {}
+                        { }
                         {user.user_metadata && Object.keys(user.user_metadata).length > 0 && (
                             <div className="mt-8">
                                 <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -326,7 +339,7 @@ export default function UserDetailDialog({ isOpen, onClose, user, onUserUpdated 
                         )}
                     </div>
 
-                    {}
+                    { }
                     <div className="p-6 border-t border-gray-200 bg-gray-50">
                         <div className="flex justify-end gap-3">
                             <button

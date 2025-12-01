@@ -6,6 +6,16 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { AlertCircle, CheckCircle2, RefreshCw } from "lucide-react"
 
+/**
+ * QR Scanner Component
+ * Uses html5-qrcode to scan QR codes from the device camera.
+ * 
+ * @component
+ * @param {Object} props - Component props
+ * @param {Function} props.onScan - Callback function called when a QR code is successfully scanned. Receives the decoded text.
+ * @param {Function} [props.onError] - Optional callback function called when a scan error occurs.
+ * @returns {JSX.Element} The rendered scanner component
+ */
 export default function QRScanner({ onScan, onError }) {
     const [scanResult, setScanResult] = useState(null)
     const scannerRef = useRef(null)

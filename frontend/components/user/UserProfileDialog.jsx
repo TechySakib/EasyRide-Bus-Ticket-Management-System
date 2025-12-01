@@ -16,6 +16,16 @@ import {
 import { supabase } from "@/lib/supabase"
 import { getRoleLabel, getRoleColor } from "@/lib/roles"
 
+/**
+ * User Profile Dialog Component
+ * Displays the current user's profile information.
+ * 
+ * @component
+ * @param {Object} props - Component props
+ * @param {boolean} props.isOpen - Controls the visibility of the dialog
+ * @param {Function} props.onClose - Callback function to close the dialog
+ * @returns {JSX.Element|null} The rendered dialog or null if not open
+ */
 export default function UserProfileDialog({ isOpen, onClose }) {
     const [user, setUser] = useState(null)
     const [loading, setLoading] = useState(true)
@@ -65,13 +75,13 @@ export default function UserProfileDialog({ isOpen, onClose }) {
 
     return (
         <>
-            {}
+            { }
             <div
                 className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 animate-fadeIn"
                 onClick={onClose}
             />
 
-            {}
+            { }
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
                 <div
                     className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col pointer-events-auto animate-slideUp overflow-hidden"
@@ -83,7 +93,7 @@ export default function UserProfileDialog({ isOpen, onClose }) {
                         </div>
                     ) : user ? (
                         <>
-                            {}
+                            { }
                             <div className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 p-8 text-white">
                                 <button
                                     onClick={onClose}
@@ -109,7 +119,7 @@ export default function UserProfileDialog({ isOpen, onClose }) {
                                     </div>
                                 </div>
 
-                                {}
+                                { }
                                 <div className="mt-4">
                                     <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold bg-white/20 backdrop-blur-sm border border-white/30">
                                         <Shield className="h-4 w-4" />
@@ -118,10 +128,10 @@ export default function UserProfileDialog({ isOpen, onClose }) {
                                 </div>
                             </div>
 
-                            {}
+                            { }
                             <div className="flex-1 overflow-auto p-8">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {}
+                                    { }
                                     <InfoSection title="Contact Information">
                                         <InfoItem
                                             icon={<Mail className="h-5 w-5 text-blue-600" />}
@@ -135,7 +145,7 @@ export default function UserProfileDialog({ isOpen, onClose }) {
                                         />
                                     </InfoSection>
 
-                                    {}
+                                    { }
                                     <InfoSection title="Account Information">
                                         <InfoItem
                                             icon={<Hash className="h-5 w-5 text-purple-600" />}
@@ -157,7 +167,7 @@ export default function UserProfileDialog({ isOpen, onClose }) {
                                         />
                                     </InfoSection>
 
-                                    {}
+                                    { }
                                     <InfoSection title="Activity">
                                         <InfoItem
                                             icon={<Calendar className="h-5 w-5 text-indigo-600" />}
@@ -171,7 +181,7 @@ export default function UserProfileDialog({ isOpen, onClose }) {
                                         />
                                     </InfoSection>
 
-                                    {}
+                                    { }
                                     <InfoSection title="Status">
                                         <InfoItem
                                             icon={user.email_confirmed_at ?
@@ -195,7 +205,7 @@ export default function UserProfileDialog({ isOpen, onClose }) {
                                 </div>
                             </div>
 
-                            {}
+                            { }
                             <div className="p-6 border-t border-gray-200 bg-gray-50">
                                 <div className="flex justify-end">
                                     <button

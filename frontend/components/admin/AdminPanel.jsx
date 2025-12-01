@@ -6,6 +6,14 @@ import { UserCog, UserPlus, Users, BarChart3, ChevronDown, UsersRound } from "lu
 import CreateUserDialog from "./CreateUserDialog"
 import UserManagementDialog from "./UserManagementDialog"
 
+/**
+ * Admin Panel Component
+ * Provides a dropdown menu with administrative actions like creating users and managing users.
+ * Only visible to users with Admin role.
+ * 
+ * @component
+ * @returns {JSX.Element} The rendered admin panel component
+ */
 export default function AdminPanel() {
     const router = useRouter()
     const [isOpen, setIsOpen] = useState(false)
@@ -26,13 +34,13 @@ export default function AdminPanel() {
 
                 {isOpen && (
                     <>
-                        {}
+                        { }
                         <div
                             className="fixed inset-0 z-10"
                             onClick={() => setIsOpen(false)}
                         />
 
-                        {}
+                        { }
                         <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden z-20">
                             <div className="p-2">
                                 <button
@@ -104,7 +112,7 @@ export default function AdminPanel() {
                 )}
             </div>
 
-            {}
+            { }
             <CreateUserDialog
                 isOpen={showCreateDialog}
                 onClose={() => setShowCreateDialog(false)}
@@ -113,7 +121,7 @@ export default function AdminPanel() {
                 }}
             />
 
-            {}
+            { }
             <UserManagementDialog
                 isOpen={showUserManagement}
                 onClose={() => setShowUserManagement(false)}

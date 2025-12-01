@@ -1,8 +1,25 @@
+/**
+ * Ticket Controller
+ * Handles ticket validation and related operations.
+ * @module controllers/ticketController
+ */
+
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
+/**
+ * Validates a scanned QR code for a bus ticket.
+ * 
+ * @async
+ * @function validateTicket
+ * @param {Object} req - Express request object
+ * @param {Object} req.body - Request body
+ * @param {string} req.body.qr_code_data - The scanned QR code data string
+ * @param {Object} res - Express response object
+ * @returns {Promise<void>} Sends a JSON response with ticket details or error message
+ */
 exports.validateTicket = async (req, res) => {
     const { qr_code_data } = req.body;
 

@@ -23,6 +23,13 @@ import { supabase } from "@/lib/supabase"
 import { isAdmin, getUserRole, getRoleLabel, getRoleColor } from "@/lib/roles"
 import UserDetailDialog from "@/components/admin/UserDetailDialog"
 
+/**
+ * All Users Page Component
+ * A full-page view for admins to manage all users.
+ * 
+ * @component
+ * @returns {JSX.Element} The rendered all users page
+ */
 export default function AllUsersPage() {
     const router = useRouter()
     const [currentUser, setCurrentUser] = useState(null)
@@ -42,7 +49,7 @@ export default function AllUsersPage() {
                 return
             }
 
-            
+
             if (!isAdmin(session.user)) {
                 router.push("/dashboard")
                 return
@@ -153,7 +160,7 @@ export default function AllUsersPage() {
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans">
-            {}
+            { }
             <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
@@ -177,7 +184,7 @@ export default function AllUsersPage() {
                                 </span>
                             </button>
 
-                            {}
+                            { }
                             <div className="flex items-center gap-2">
                                 <div className="text-right hidden sm:block">
                                     <div className="text-sm font-medium text-gray-900">
@@ -200,7 +207,7 @@ export default function AllUsersPage() {
             </header>
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {}
+                { }
                 <div className="mb-8">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="bg-blue-100 p-3 rounded-xl">
@@ -212,7 +219,7 @@ export default function AllUsersPage() {
                         </div>
                     </div>
 
-                    {}
+                    { }
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                         <StatsCard
                             title="Total Users"
@@ -241,10 +248,10 @@ export default function AllUsersPage() {
                     </div>
                 </div>
 
-                {}
+                { }
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {}
+                        { }
                         <div className="md:col-span-2">
                             <div className="relative">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -258,7 +265,7 @@ export default function AllUsersPage() {
                             </div>
                         </div>
 
-                        {}
+                        { }
                         <div className="relative">
                             <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
                             <select
@@ -289,7 +296,7 @@ export default function AllUsersPage() {
                     </div>
                 </div>
 
-                {}
+                { }
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     {fetchingUsers && !users.length ? (
                         <div className="flex flex-col items-center justify-center py-12">
@@ -406,7 +413,7 @@ export default function AllUsersPage() {
                 </div>
             </main>
 
-            {}
+            { }
             <UserDetailDialog
                 isOpen={!!selectedUser}
                 onClose={() => setSelectedUser(null)}
