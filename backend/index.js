@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const authMiddleware = require('./middleware/auth');
 const userRoutes = require('./routes/userRoutes');
+const routeRoutes = require('./routes/routeRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -26,6 +27,7 @@ app.get('/api/protected', authMiddleware, (req, res) => {
 
 
 app.use('/api/users', userRoutes);
+app.use('/api/routes', routeRoutes);
 
 
 app.listen(port, () => {
