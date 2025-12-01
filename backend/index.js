@@ -26,6 +26,8 @@ app.get('/api/protected', authMiddleware, (req, res) => {
 
 
 app.use('/api/users', userRoutes);
+const ticketRoutes = require('./routes/ticketRoutes');
+app.use('/api/tickets', ticketRoutes);
 
 
 app.listen(port, () => {
