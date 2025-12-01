@@ -249,6 +249,51 @@ const UserController = {
             console.error('Update role error:', err);
             res.status(500).json({ error: 'Internal server error' });
         }
+    },
+
+    /**
+     * Logs user access to the scan page.
+     * 
+     * @async
+     * @function logAccess
+     * @memberof UserController
+     * @param {Object} req - Express request object
+     * @param {Object} res - Express response object
+     * @returns {Promise<void>} Sends JSON response
+     */
+    logAccess: async (req, res) => {
+        try {
+            const authHeader = req.headers.authorization;
+            if (!authHeader || !authHeader.startsWith('Bearer ')) {
+                return res.status(401).json({ error: 'Missing or invalid authorization header' });
+            }
+
+            const token = authHeader.split(' ')[1];
+            const { data: { user }, error } = await UserModel.getUserByToken(token);
+
+            if (error || !user) {
+                console.log('Access Log: Unauthenticated access attempt');
+                return res.status(401).json({ error: 'Invalid token' });
+            }
+
+            const role = user.user_metadata?.role || 'passenger';
+            const logMessage = `[${new Date().toISOString()}] User: ${user.email}, Role: ${role} accessed Scan Page\n`;
+
+            console.log('Access Log:', logMessage.trim());
+
+            const fs = require('fs');
+            const path = require('path');
+            const logPath = path.join(__dirname, '../access.log');
+
+            fs.appendFile(logPath, logMessage, (err) => {
+                if (err) console.error('Failed to write to access log:', err);
+            });
+
+            res.json({ success: true, role });
+        } catch (err) {
+            console.error('Log access error:', err);
+            res.status(500).json({ error: 'Internal server error' });
+        }
     }
 };
 

@@ -71,3 +71,48 @@ exports.validateTicket = async (req, res) => {
         res.status(500).json({ message: 'Server error during validation' });
     }
 };
+
+/**
+ * Retrieves bookings for the authenticated user.
+ * 
+ * @async
+ * @function getUserBookings
+ * @param {Object} req - Express request object
+ * @param {Object} req.user - Authenticated user object
+ * @param {Object} res - Express response object
+ * @returns {Promise<void>} Sends a JSON response with user bookings
+ */
+exports.getUserBookings = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const { data: bookings, error } = await supabase
+            .from('easyride_bookings')
+            .select(`
+                id,
+                journey_date,
+                booking_status,
+                seat_number,
+                easyride_bus_assignments (
+                    easyride_routes (
+                        name
+                    ),
+                    easyride_buses (
+                        bus_number
+                    )
+                )
+            `)
+            .eq('passenger_id', userId)
+            .order('journey_date', { ascending: false })
+            .limit(5);
+
+        if (error) {
+            throw error;
+        }
+
+        res.json({ bookings });
+    } catch (error) {
+        console.error('Error fetching user bookings:', error);
+        res.status(500).json({ message: 'Failed to fetch bookings' });
+    }
+};

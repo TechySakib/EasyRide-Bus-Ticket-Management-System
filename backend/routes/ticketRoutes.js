@@ -18,4 +18,13 @@ const authMiddleware = require('../middleware/auth'); // Assuming you want to pr
  */
 router.post('/validate', ticketController.validateTicket);
 
+/**
+ * Route to get authenticated user's bookings.
+ * @name GET /api/tickets/my-bookings
+ * @function
+ * @memberof module:routes/ticketRoutes
+ * @inner
+ */
+router.get('/my-bookings', authMiddleware, ticketController.getUserBookings);
+
 module.exports = router;

@@ -52,5 +52,15 @@ router.post('/update-password', UserController.updatePassword);
  */
 router.post('/update-role', requireAdmin, UserController.updateRole);
 
+
+/**
+ * Route to log user access to scan page.
+ * @name POST /api/users/log-access
+ * @function
+ * @memberof module:routes/userRoutes
+ * @inner
+ */
+router.post('/log-access', UserController.logAccess);
+
 module.exports = router;
 
