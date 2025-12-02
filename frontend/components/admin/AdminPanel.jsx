@@ -2,10 +2,11 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { UserCog, UserPlus, Users, BarChart3, ChevronDown, UsersRound, MapPin } from "lucide-react"
+import { UserCog, UserPlus, Users, BarChart3, ChevronDown, UsersRound, MapPin, Bus } from "lucide-react"
 import CreateUserDialog from "./CreateUserDialog"
 import CreateRouteDialog from "./CreateRouteDialog"
 import UserManagementDialog from "./UserManagementDialog"
+import ManageAssignmentsDialog from "./ManageAssignmentsDialog"
 import AdminTicketPanel from "./AdminTicketPanel"
 
 export default function AdminPanel() {
@@ -15,6 +16,7 @@ export default function AdminPanel() {
     const [showCreateRouteDialog, setShowCreateRouteDialog] = useState(false)
     const [showUserManagement, setShowUserManagement] = useState(false)
     const [showTicketsPanel, setShowTicketsPanel] = useState(false)
+    const [showAssignmentsDialog, setShowAssignmentsDialog] = useState(false)
 
     return (
         <>
@@ -68,6 +70,22 @@ export default function AdminPanel() {
                                     <div>
                                         <div className="font-medium text-gray-900">Create Route</div>
                                         <div className="text-xs text-gray-500">Add new bus route</div>
+                                    </div>
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        setShowAssignmentsDialog(true)
+                                        setIsOpen(false)
+                                    }}
+                                    className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-cyan-50 rounded-lg transition-colors group"
+                                >
+                                    <div className="bg-cyan-100 p-2 rounded-lg group-hover:bg-cyan-200 transition-colors">
+                                        <Bus className="h-5 w-5 text-cyan-600" />
+                                    </div>
+                                    <div>
+                                        <div className="font-medium text-gray-900">Assign Conductors</div>
+                                        <div className="text-xs text-gray-500">Manage bus staff</div>
                                     </div>
                                 </button>
 
@@ -140,6 +158,12 @@ export default function AdminPanel() {
                 onRouteCreated={() => {
                     window.location.reload()
                 }}
+            />
+
+            {/* Manage Assignments Dialog */}
+            <ManageAssignmentsDialog
+                isOpen={showAssignmentsDialog}
+                onClose={() => setShowAssignmentsDialog(false)}
             />
 
             {/* User Management Dialog */}

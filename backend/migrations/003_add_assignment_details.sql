@@ -1,0 +1,3 @@
+ALTER TABLE easyride_bus_assignments 
+ADD COLUMN IF NOT EXISTS arrival_time TIMESTAMP WITH TIME ZONE,
+ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'scheduled';

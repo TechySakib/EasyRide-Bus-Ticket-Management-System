@@ -30,6 +30,8 @@ const routeRoutes = require('./routes/routeRoutes');
 app.use('/api/routes', routeRoutes);
 const ticketRoutes = require('./routes/ticketRoutes');
 app.use('/api/tickets', ticketRoutes);
+const busAssignmentRoutes = require('./routes/busAssignmentRoutes');
+app.use('/api/assignments', busAssignmentRoutes);
 
 
 app.listen(port, () => {

@@ -145,9 +145,7 @@ const TicketController = {
                     seat_number,
                     easyride_bus_assignments (
                         easyride_routes (
-                            name,
-                            origin_location,
-                            destination_location
+                            name
                         )
                     )
                 `)

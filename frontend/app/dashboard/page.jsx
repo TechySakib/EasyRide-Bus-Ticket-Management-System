@@ -35,6 +35,7 @@ import ReportIssueModal from "@/components/user/ReportIssueModal"
 import MyIssuesDialog from "@/components/user/MyIssuesDialog"
 import { isAdmin, getUserRole, getRoleLabel, getRoleColor, ROLES } from "@/lib/roles"
 import { logUserRole } from "../actions"
+import ConductorDashboard from "@/components/conductor/ConductorDashboard"
 
 export default function DashboardPage() {
     const router = useRouter()
@@ -126,6 +127,47 @@ export default function DashboardPage() {
     }
 
     if (!user) return null
+
+    if (userRole === 'conductor') {
+        return (
+            <div className="min-h-screen bg-slate-50 font-sans">
+                <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex justify-between items-center h-16">
+                            <div className="flex items-center gap-2">
+                                <div className="bg-blue-600 p-1.5 rounded-lg">
+                                    <Bus className="h-6 w-6 text-white" />
+                                </div>
+                                <span className="text-xl font-bold text-blue-600">EasyRide</span>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <div className="text-right hidden sm:block">
+                                    <div className="text-sm font-medium text-gray-900">
+                                        {user?.user_metadata?.full_name || 'Conductor'}
+                                    </div>
+                                    <div className="text-xs font-medium text-blue-600">
+                                        Conductor
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={async () => {
+                                        await supabase.auth.signOut()
+                                        router.push("/")
+                                    }}
+                                    className="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                                >
+                                    <LogOut className="h-5 w-5" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <ConductorDashboard user={user} />
+                </main>
+            </div>
+        )
+    }
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans">
