@@ -6,6 +6,7 @@ import { UserCog, UserPlus, Users, BarChart3, ChevronDown, UsersRound, MapPin } 
 import CreateUserDialog from "./CreateUserDialog"
 import CreateRouteDialog from "./CreateRouteDialog"
 import UserManagementDialog from "./UserManagementDialog"
+import AdminTicketPanel from "./AdminTicketPanel"
 
 export default function AdminPanel() {
     const router = useRouter()
@@ -13,6 +14,7 @@ export default function AdminPanel() {
     const [showCreateDialog, setShowCreateDialog] = useState(false)
     const [showCreateRouteDialog, setShowCreateRouteDialog] = useState(false)
     const [showUserManagement, setShowUserManagement] = useState(false)
+    const [showTicketsPanel, setShowTicketsPanel] = useState(false)
 
     return (
         <>
@@ -103,7 +105,7 @@ export default function AdminPanel() {
 
                                 <button
                                     onClick={() => {
-                                        alert('Reports feature coming soon!')
+                                        setShowTicketsPanel(true)
                                         setIsOpen(false)
                                     }}
                                     className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-emerald-50 rounded-lg transition-colors group"
@@ -144,6 +146,12 @@ export default function AdminPanel() {
             <UserManagementDialog
                 isOpen={showUserManagement}
                 onClose={() => setShowUserManagement(false)}
+            />
+
+            {/* Admin Ticket Panel */}
+            <AdminTicketPanel
+                isOpen={showTicketsPanel}
+                onClose={() => setShowTicketsPanel(false)}
             />
         </>
     )
