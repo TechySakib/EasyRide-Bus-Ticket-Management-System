@@ -35,6 +35,14 @@ import { isAdmin, getUserRole, getRoleLabel, getRoleColor, ROLES } from "@/lib/r
 import { logUserRole } from "../actions"
 import ChatBox from "@/components/chat/ChatBox"
 
+/**
+ * Dashboard Page
+ * Main landing page for authenticated users.
+ * Displays user stats, booking options, and access to other features.
+ * 
+ * @component
+ * @returns {JSX.Element} Dashboard UI
+ */
 export default function DashboardPage() {
     const router = useRouter()
     const [user, setUser] = useState(null)
@@ -431,6 +439,7 @@ export default function DashboardPage() {
             <ChatBox
                 isOpen={showChat}
                 onClose={() => setShowChat(false)}
+                userName={user?.user_metadata?.full_name || 'User'}
             />
         </div>
     )

@@ -6,6 +6,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
+import { supabase } from "@/lib/supabase"
 
 /**
  * ChatBox Component
@@ -23,12 +24,12 @@ import { Card } from "@/components/ui/card"
  *   <ChatBox isOpen={true} onClose={() => setShowChat(false)} />
  * )
  */
-export default function ChatBox({ isOpen, onClose }) {
+export default function ChatBox({ isOpen, onClose, userName }) {
     // Model: State for messages and input
     const [messages, setMessages] = useState([
         {
             id: 1,
-            text: "Hello! I'm Sakib Al Hasan. How can I help you today?",
+            text: `Hey ${userName}! I'm Sakib Al Hasan. How can I help you today?`,
             sender: "agent",
             timestamp: new Date()
         }
@@ -56,6 +57,14 @@ export default function ChatBox({ isOpen, onClose }) {
         setIsTyping(true)
 
         try {
+            // Get session for auth token
+            const { data: { session } } = await supabase.auth.getSession()
+            const token = session?.access_token
+
+            if (!token) {
+                throw new Error("User not authenticated")
+            }
+
             // Prepare history for API
             const history = updatedMessages.map(msg => ({
                 role: msg.sender === 'user' ? 'user' : 'assistant',
@@ -66,6 +75,7 @@ export default function ChatBox({ isOpen, onClose }) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
                     message: newUserMessage.text,
