@@ -159,7 +159,7 @@ export default function BookingsPage() {
 
         doc.setFontSize(14)
         doc.text(`Total Tickets Booked: ${totalTickets}`, 20, 50)
-        doc.text(`Total Cost: ৳${totalCost.toFixed(2)}`, 20, 60)
+        doc.text(`Total Cost: BDT ${totalCost.toFixed(2)}`, 20, 60)
 
         doc.setFontSize(12)
         doc.text('Booking Details:', 20, 75)
@@ -173,7 +173,7 @@ export default function BookingsPage() {
 
             doc.text(`${index + 1}. ${booking.route || 'N/A'}`, 20, yPosition)
             doc.text(`   Date: ${new Date(booking.date).toLocaleDateString()}`, 20, yPosition + 5)
-            doc.text(`   Bus: ${booking.busNumber || 'N/A'} | Seat: ${booking.seat || 'N/A'} | Amount: ৳${booking.amount || 0}`, 20, yPosition + 10)
+            doc.text(`   Bus: ${booking.busNumber || 'N/A'} | Seat: ${booking.seat || 'N/A'} | Amount: BDT ${booking.amount || 0}`, 20, yPosition + 10)
             yPosition += 20
         })
 
@@ -363,7 +363,7 @@ export default function BookingsPage() {
                                         Total Tickets: <span className="font-semibold text-gray-900">{calculateReportStats().totalTickets}</span>
                                     </p>
                                     <p className="text-gray-600">
-                                        Total Cost: <span className="font-semibold text-gray-900">৳{calculateReportStats().totalCost.toFixed(2)}</span>
+                                        Total Cost: <span className="font-semibold text-gray-900">BDT {calculateReportStats().totalCost.toFixed(2)}</span>
                                     </p>
                                 </div>
                             </div>
