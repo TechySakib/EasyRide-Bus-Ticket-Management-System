@@ -1,15 +1,96 @@
 const UserModel = require('../models/userModel');
 const { ROLES } = require('../middleware/roleMiddleware');
+const { sendOTP, verifyOTP } = require('../utils/otpUtils');
 
 
 const UserController = {
-    
+
+    sendOtp: async (req, res) => {
+        try {
+            const { phone } = req.body;
+            if (!phone) {
+                return res.status(400).json({ error: 'Phone number is required' });
+            }
+
+            const otp = await sendOTP(phone);
+            console.log(`OTP for ${phone}: ${otp}`);
+
+            res.json({ success: true, message: 'OTP sent successfully', otp });
+        } catch (err) {
+            console.error('Send OTP error:', err);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    },
+
+    signup: async (req, res) => {
+        try {
+            console.log('Received signup request:', req.body);
+            const { email, password, name, phone, studentId, otp } = req.body;
+
+            if (!email || !password || !phone || !otp) {
+                return res.status(400).json({
+                    error: 'Missing required fields',
+                    required: ['email', 'password', 'phone', 'otp']
+                });
+            }
+
+
+            const isValidOtp = verifyOTP(phone, otp);
+            if (!isValidOtp) {
+                return res.status(400).json({ error: 'Invalid or expired OTP' });
+            }
+
+
+            const role = ROLES.PASSENGER;
+
+            if (password.length < 6) {
+                return res.status(400).json({
+                    error: 'Password must be at least 6 characters'
+                });
+            }
+
+            const { data, error } = await UserModel.createUser({
+                email,
+                password,
+                metadata: {
+                    full_name: name || '',
+                    phone: phone,
+                    student_id: studentId || '',
+                    role: role
+                }
+            });
+
+            if (error) {
+                console.error('Error creating user:', error);
+                return res.status(400).json({
+                    error: error.message || 'Failed to create user'
+                });
+            }
+
+            res.status(201).json({
+                success: true,
+                message: 'User registered successfully',
+                user: {
+                    id: data.user.id,
+                    email: data.user.email,
+                    role: role,
+                    name: name,
+                    phone: phone,
+                    created_at: data.user.created_at
+                }
+            });
+        } catch (err) {
+            console.error('Signup error:', err);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    },
+
     createUser: async (req, res) => {
         try {
             console.log('Received create user request:', req.body);
             const { email, password, role, name, phone, studentId } = req.body;
 
-            
+
             if (!email || !password || !role) {
                 console.log('Missing required fields:', { email: !!email, password: !!password, role: !!role });
                 return res.status(400).json({
@@ -18,7 +99,7 @@ const UserController = {
                 });
             }
 
-            
+
             const validRoles = [ROLES.PASSENGER, ROLES.ADMIN, ROLES.CONDUCTOR];
             if (!validRoles.includes(role)) {
                 console.log('Invalid role:', role, 'Valid roles:', validRoles);
@@ -28,14 +109,14 @@ const UserController = {
                 });
             }
 
-            
+
             if (password.length < 6) {
                 return res.status(400).json({
                     error: 'Password must be at least 6 characters'
                 });
             }
 
-            
+
             const { data, error } = await UserModel.createUser({
                 email,
                 password,
@@ -54,7 +135,7 @@ const UserController = {
                 });
             }
 
-            
+
             res.status(201).json({
                 success: true,
                 user: {
@@ -72,7 +153,7 @@ const UserController = {
         }
     },
 
-    
+
     listUsers: async (req, res) => {
         try {
             const { data, error } = await UserModel.listUsers();
@@ -82,7 +163,7 @@ const UserController = {
                 return res.status(400).json({ error: error.message });
             }
 
-            
+
             const users = data.users.map(user => ({
                 id: user.id,
                 email: user.email,
@@ -100,7 +181,7 @@ const UserController = {
         }
     },
 
-    
+
     updatePassword: async (req, res) => {
         try {
             const authHeader = req.headers.authorization;
@@ -149,7 +230,7 @@ const UserController = {
         }
     },
 
-    
+
     updateRole: async (req, res) => {
         try {
             const { userId, newRole } = req.body;

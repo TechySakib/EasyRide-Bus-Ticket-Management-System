@@ -18,12 +18,13 @@ export default function SignupPage() {
         phone: "",
         studentId: "",
         password: "",
+        otp: "",
     })
     const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
+    const [otpSent, setOtpSent] = useState(false)
 
-    
     useEffect(() => {
         const checkUser = async () => {
             const { data: { session } } = await supabase.auth.getSession()
@@ -35,6 +36,9 @@ export default function SignupPage() {
     }, [router])
 
     const handleChange = (e) => {
+        if (e.target.id === 'phone') {
+            setOtpSent(false); // Reset OTP state if phone changes
+        }
         setFormData({ ...formData, [e.target.id]: e.target.value })
     }
 
@@ -44,30 +48,53 @@ export default function SignupPage() {
         setError(null)
 
         try {
-            const { data, error } = await supabase.auth.signUp({
-                email: formData.email,
-                password: formData.password,
-                options: {
-                    data: {
-                        full_name: formData.name,
-                        phone: formData.phone,
-                        student_id: formData.studentId,
-                        role: 'passenger',
+            if (!otpSent) {
+                // Send OTP Flow
+                if (!formData.phone) {
+                    throw new Error("Please enter a phone number")
+                }
+
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/users/send-otp`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
                     },
-                },
-            })
+                    body: JSON.stringify({ phone: formData.phone }),
+                })
 
-            if (error) {
-                throw error
-            }
+                const data = await response.json()
 
-            
-            if (data.session) {
-                alert("Signup successful! Logging you in...")
-                router.push("/dashboard")
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to send OTP')
+                }
+
+                setOtpSent(true)
+                console.log("OTP Sent (Dev):", data.otp)
+                alert(`OTP sent to ${formData.phone}`)
             } else {
-                
-                alert("Signup successful! Please check your email for verification.")
+                // Registration Flow
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/users/signup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: formData.email,
+                        password: formData.password,
+                        name: formData.name,
+                        phone: formData.phone,
+                        studentId: formData.studentId,
+                        otp: formData.otp
+                    }),
+                })
+
+                const data = await response.json()
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to register')
+                }
+
+                alert("Signup successful! Please login.")
                 router.push("/")
             }
         } catch (err) {
@@ -142,6 +169,24 @@ export default function SignupPage() {
                         </div>
                     </div>
 
+                    {otpSent && (
+                        <div className="space-y-2">
+                            <Label htmlFor="otp">Enter OTP</Label>
+                            <div className="relative">
+                                <Input
+                                    id="otp"
+                                    type="text"
+                                    placeholder="Enter 6-digit OTP"
+                                    value={formData.otp}
+                                    onChange={handleChange}
+                                    required
+                                    maxLength={6}
+                                />
+                            </div>
+                            <p className="text-xs text-gray-500">Check console for dummy OTP</p>
+                        </div>
+                    )}
+
                     <div className="space-y-2">
                         <Label htmlFor="studentId">Student ID</Label>
                         <div className="relative">
@@ -191,7 +236,7 @@ export default function SignupPage() {
                     )}
 
                     <Button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700">
-                        {loading ? "Creating Account..." : "Register"}
+                        {loading ? "Processing..." : (otpSent ? "Register" : "Register")}
                     </Button>
                 </form>
 
