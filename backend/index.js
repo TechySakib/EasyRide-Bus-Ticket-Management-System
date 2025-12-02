@@ -26,6 +26,7 @@ app.get('/api/protected', authMiddleware, (req, res) => {
 
 
 app.use('/api/users', userRoutes);
+app.use('/api/bookings', require('./routes/bookingRoutes'));
 
 
 app.listen(port, () => {
