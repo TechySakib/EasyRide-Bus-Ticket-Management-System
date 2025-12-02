@@ -10,13 +10,17 @@ import {
     MapPin,
     Search,
     ArrowLeft,
-    Filter
+    Filter,
+    Download,
+    FileText
 } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { jsPDF } from "jspdf"
 
 /**
  * Booking History Page
@@ -29,6 +33,10 @@ export default function BookingsPage() {
     const [loading, setLoading] = useState(true)
     const [filterDate, setFilterDate] = useState("")
     const [filteredBookings, setFilteredBookings] = useState([])
+    const [showReportDialog, setShowReportDialog] = useState(false)
+    const [reportTimeRange, setReportTimeRange] = useState("month")
+    const [customStartDate, setCustomStartDate] = useState("")
+    const [customEndDate, setCustomEndDate] = useState("")
 
     useEffect(() => {
         const fetchBookings = async () => {
@@ -83,6 +91,96 @@ export default function BookingsPage() {
         }
     }
 
+    /**
+     * Calculate date range based on selected time range option
+     * @returns {Object} Object containing startDate and endDate
+     */
+    const getDateRange = () => {
+        const now = new Date()
+        let startDate = new Date()
+
+        switch (reportTimeRange) {
+            case 'month':
+                startDate.setMonth(now.getMonth() - 1)
+                break
+            case 'last6months':
+                startDate.setMonth(now.getMonth() - 6)
+                break
+            case 'semester':
+                startDate.setMonth(now.getMonth() - 4)
+                break
+            case 'custom':
+                if (customStartDate && customEndDate) {
+                    return {
+                        startDate: new Date(customStartDate),
+                        endDate: new Date(customEndDate)
+                    }
+                }
+                return { startDate: new Date(0), endDate: now }
+            default:
+                startDate.setMonth(now.getMonth() - 1)
+        }
+
+        return { startDate, endDate: now }
+    }
+
+    /**
+     * Calculate report statistics for selected time range
+     * @returns {Object} Object containing totalTickets, totalCost, and filteredBookings
+     */
+    const calculateReportStats = () => {
+        const { startDate, endDate } = getDateRange()
+
+        const reportBookings = bookings.filter(booking => {
+            const bookingDate = new Date(booking.date)
+            return bookingDate >= startDate && bookingDate <= endDate
+        })
+
+        const totalTickets = reportBookings.length
+        const totalCost = reportBookings.reduce((sum, booking) => sum + (parseFloat(booking.amount) || 0), 0)
+
+        return { totalTickets, totalCost, reportBookings }
+    }
+
+    /**
+     * Generate and download PDF report
+     */
+    const downloadReport = () => {
+        const { totalTickets, totalCost, reportBookings } = calculateReportStats()
+        const { startDate, endDate } = getDateRange()
+
+        const doc = new jsPDF()
+
+        doc.setFontSize(20)
+        doc.text('EasyRide Booking Report', 105, 20, { align: 'center' })
+
+        doc.setFontSize(12)
+        doc.text(`Period: ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`, 20, 35)
+
+        doc.setFontSize(14)
+        doc.text(`Total Tickets Booked: ${totalTickets}`, 20, 50)
+        doc.text(`Total Cost: ৳${totalCost.toFixed(2)}`, 20, 60)
+
+        doc.setFontSize(12)
+        doc.text('Booking Details:', 20, 75)
+
+        let yPosition = 85
+        reportBookings.forEach((booking, index) => {
+            if (yPosition > 270) {
+                doc.addPage()
+                yPosition = 20
+            }
+
+            doc.text(`${index + 1}. ${booking.route || 'N/A'}`, 20, yPosition)
+            doc.text(`   Date: ${new Date(booking.date).toLocaleDateString()}`, 20, yPosition + 5)
+            doc.text(`   Bus: ${booking.busNumber || 'N/A'} | Seat: ${booking.seat || 'N/A'} | Amount: ৳${booking.amount || 0}`, 20, yPosition + 10)
+            yPosition += 20
+        })
+
+        doc.save(`EasyRide_Report_${new Date().toISOString().split('T')[0]}.pdf`)
+        setShowReportDialog(false)
+    }
+
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -118,25 +216,34 @@ export default function BookingsPage() {
                         <p className="text-gray-500">View and manage your travel history</p>
                     </div>
 
-                    <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-gray-200 shadow-sm">
-                        <Filter className="h-4 w-4 text-gray-400 ml-2" />
-                        <Input
-                            type="date"
-                            value={filterDate}
-                            onChange={(e) => setFilterDate(e.target.value)}
-                            className="border-0 focus-visible:ring-0 w-auto"
-                            placeholder="Filter by date"
-                        />
-                        {filterDate && (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setFilterDate("")}
-                                className="text-gray-500 hover:text-gray-700"
-                            >
-                                Clear
-                            </Button>
-                        )}
+                    <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-gray-200 shadow-sm">
+                            <Filter className="h-4 w-4 text-gray-400 ml-2" />
+                            <Input
+                                type="date"
+                                value={filterDate}
+                                onChange={(e) => setFilterDate(e.target.value)}
+                                className="border-0 focus-visible:ring-0 w-auto"
+                                placeholder="Filter by date"
+                            />
+                            {filterDate && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setFilterDate("")}
+                                    className="text-gray-500 hover:text-gray-700"
+                                >
+                                    Clear
+                                </Button>
+                            )}
+                        </div>
+                        <Button
+                            onClick={() => setShowReportDialog(true)}
+                            className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
+                        >
+                            <Download className="h-4 w-4" />
+                            Download Report
+                        </Button>
                     </div>
                 </div>
 
@@ -203,6 +310,83 @@ export default function BookingsPage() {
                         ))}
                     </div>
                 )}
+
+                <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Generate Booking Report</DialogTitle>
+                            <DialogDescription>
+                                Select a time range to generate a summary report of your bookings
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <div className="space-y-4 mt-4">
+                            <div>
+                                <label className="text-sm font-medium text-gray-700 mb-2 block">Time Range</label>
+                                <select
+                                    value={reportTimeRange}
+                                    onChange={(e) => setReportTimeRange(e.target.value)}
+                                    className="w-full p-2 border border-gray-300 rounded-md"
+                                >
+                                    <option value="month">Last Month</option>
+                                    <option value="last6months">Last 6 Months</option>
+                                    <option value="semester">Semester (4 months)</option>
+                                    <option value="custom">Custom Range</option>
+                                </select>
+                            </div>
+
+                            {reportTimeRange === 'custom' && (
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-700 mb-2 block">Start Date</label>
+                                        <Input
+                                            type="date"
+                                            value={customStartDate}
+                                            onChange={(e) => setCustomStartDate(e.target.value)}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-700 mb-2 block">End Date</label>
+                                        <Input
+                                            type="date"
+                                            value={customEndDate}
+                                            onChange={(e) => setCustomEndDate(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                                <h4 className="font-semibold text-gray-900 mb-2">Report Summary</h4>
+                                <div className="space-y-1 text-sm">
+                                    <p className="text-gray-600">
+                                        Total Tickets: <span className="font-semibold text-gray-900">{calculateReportStats().totalTickets}</span>
+                                    </p>
+                                    <p className="text-gray-600">
+                                        Total Cost: <span className="font-semibold text-gray-900">৳{calculateReportStats().totalCost.toFixed(2)}</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-2 justify-end">
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => setShowReportDialog(false)}
+                                    className="text-gray-600 hover:text-gray-800"
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    onClick={downloadReport}
+                                    className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
+                                >
+                                    <FileText className="h-4 w-4" />
+                                    Download PDF
+                                </Button>
+                            </div>
+                        </div>
+                    </DialogContent>
+                </Dialog>
             </main>
         </div>
     )
