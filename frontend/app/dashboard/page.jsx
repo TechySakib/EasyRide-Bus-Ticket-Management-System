@@ -33,6 +33,7 @@ import ChangePasswordDialog from "@/components/user/ChangePasswordDialog"
 import UserProfileDialog from "@/components/user/UserProfileDialog"
 import { isAdmin, getUserRole, getRoleLabel, getRoleColor, ROLES } from "@/lib/roles"
 import { logUserRole } from "../actions"
+import ChatBox from "@/components/chat/ChatBox"
 
 export default function DashboardPage() {
     const router = useRouter()
@@ -45,6 +46,7 @@ export default function DashboardPage() {
     const [showUserMenu, setShowUserMenu] = useState(false)
     const [showPasswordDialog, setShowPasswordDialog] = useState(false)
     const [showProfileDialog, setShowProfileDialog] = useState(false)
+    const [showChat, setShowChat] = useState(false)
     const [dateRange, setDateRange] = useState({ min: '', max: '' })
 
     useEffect(() => {
@@ -405,7 +407,10 @@ export default function DashboardPage() {
                 <button className="bg-black text-white p-2 rounded-full shadow-lg hover:bg-gray-800 transition-colors">
                     <HelpCircle className="h-5 w-5" />
                 </button>
-                <button className="bg-blue-600 text-white p-4 rounded-full shadow-xl hover:bg-blue-700 transition-transform hover:scale-110">
+                <button
+                    onClick={() => setShowChat(!showChat)}
+                    className="bg-blue-600 text-white p-4 rounded-full shadow-xl hover:bg-blue-700 transition-transform hover:scale-110"
+                >
                     <MessageCircle className="h-6 w-6" />
                 </button>
             </div>
@@ -420,6 +425,12 @@ export default function DashboardPage() {
             <UserProfileDialog
                 isOpen={showProfileDialog}
                 onClose={() => setShowProfileDialog(false)}
+            />
+
+            {/* Chat Interface */}
+            <ChatBox
+                isOpen={showChat}
+                onClose={() => setShowChat(false)}
             />
         </div>
     )
