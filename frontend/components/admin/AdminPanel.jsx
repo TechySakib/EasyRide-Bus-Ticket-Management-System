@@ -2,14 +2,16 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { UserCog, UserPlus, Users, BarChart3, ChevronDown, UsersRound } from "lucide-react"
+import { UserCog, UserPlus, Users, BarChart3, ChevronDown, UsersRound, MapPin } from "lucide-react"
 import CreateUserDialog from "./CreateUserDialog"
+import CreateRouteDialog from "./CreateRouteDialog"
 import UserManagementDialog from "./UserManagementDialog"
 
 export default function AdminPanel() {
     const router = useRouter()
     const [isOpen, setIsOpen] = useState(false)
     const [showCreateDialog, setShowCreateDialog] = useState(false)
+    const [showCreateRouteDialog, setShowCreateRouteDialog] = useState(false)
     const [showUserManagement, setShowUserManagement] = useState(false)
 
     return (
@@ -26,13 +28,13 @@ export default function AdminPanel() {
 
                 {isOpen && (
                     <>
-                        {}
+                        {/* Backdrop */}
                         <div
                             className="fixed inset-0 z-10"
                             onClick={() => setIsOpen(false)}
                         />
 
-                        {}
+                        {/* Dropdown Menu */}
                         <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden z-20">
                             <div className="p-2">
                                 <button
@@ -48,6 +50,22 @@ export default function AdminPanel() {
                                     <div>
                                         <div className="font-medium text-gray-900">Create User</div>
                                         <div className="text-xs text-gray-500">Add new user account</div>
+                                    </div>
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        setShowCreateRouteDialog(true)
+                                        setIsOpen(false)
+                                    }}
+                                    className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-orange-50 rounded-lg transition-colors group"
+                                >
+                                    <div className="bg-orange-100 p-2 rounded-lg group-hover:bg-orange-200 transition-colors">
+                                        <MapPin className="h-5 w-5 text-orange-600" />
+                                    </div>
+                                    <div>
+                                        <div className="font-medium text-gray-900">Create Route</div>
+                                        <div className="text-xs text-gray-500">Add new bus route</div>
                                     </div>
                                 </button>
 
@@ -104,7 +122,7 @@ export default function AdminPanel() {
                 )}
             </div>
 
-            {}
+            {/* Create User Dialog */}
             <CreateUserDialog
                 isOpen={showCreateDialog}
                 onClose={() => setShowCreateDialog(false)}
@@ -113,7 +131,16 @@ export default function AdminPanel() {
                 }}
             />
 
-            {}
+            {/* Create Route Dialog */}
+            <CreateRouteDialog
+                isOpen={showCreateRouteDialog}
+                onClose={() => setShowCreateRouteDialog(false)}
+                onRouteCreated={() => {
+                    window.location.reload()
+                }}
+            />
+
+            {/* User Management Dialog */}
             <UserManagementDialog
                 isOpen={showUserManagement}
                 onClose={() => setShowUserManagement(false)}
