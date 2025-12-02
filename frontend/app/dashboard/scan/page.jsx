@@ -5,13 +5,14 @@ import { useRouter } from "next/navigation"
 import DashboardHeader from "@/components/DashboardHeader"
 import QRScanner from "@/components/admin/QRScanner"
 import { Card } from "@/components/ui/card"
-import { AlertCircle, CheckCircle2, XCircle } from "lucide-react"
+import { AlertCircle, CheckCircle2, XCircle, QrCode } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { getUserRole, ROLES } from "@/lib/roles"
+import { QRCodeSVG } from "qrcode.react"
 
 /**
  * Scan Page Component
- * The page for scanning QR codes.
+ * The page for scanning QR codes and viewing user bookings with QR codes.
  * 
  * @component
  * @returns {JSX.Element} The rendered scan page
@@ -27,6 +28,7 @@ export default function ScanPage() {
     const [loadingBookings, setLoadingBookings] = useState(true)
     const [userRole, setUserRole] = useState(null)
     const [loadingRole, setLoadingRole] = useState(true)
+    const [selectedBooking, setSelectedBooking] = useState(null) // For QR modal
 
     useEffect(() => {
         const fetchData = async () => {
@@ -72,6 +74,7 @@ export default function ScanPage() {
 
                     if (response.ok) {
                         const data = await response.json()
+                        console.log("Fetched Bookings:", data.bookings) // Debug log
                         setBookings(data.bookings || [])
                     }
                 }
@@ -86,6 +89,15 @@ export default function ScanPage() {
         fetchData()
     }, [])
 
+    /**
+     * Handles the result of a QR code scan.
+     * Validates the scanned code against the backend.
+     * 
+     * @async
+     * @function handleScan
+     * @param {string} decodedText - The decoded text from the QR code
+     * @returns {Promise<void>}
+     */
     const handleScan = async (decodedText) => {
         if (validationStatus === 'loading' || validationStatus === 'success') return
 
@@ -128,6 +140,12 @@ export default function ScanPage() {
         }
     }
 
+    /**
+     * Resets the scanner state to allow scanning another ticket.
+     * Reloads the page to ensure a fresh state for the scanner component.
+     * 
+     * @function resetScanner
+     */
     const resetScanner = () => {
         setScanResult(null)
         setValidationStatus(null)
@@ -280,9 +298,72 @@ export default function ScanPage() {
                                                 <span>{new Date(booking.journey_date).toLocaleDateString()}</span>
                                                 <span>Seat: {booking.seat_number}</span>
                                             </div>
+                                            {(Array.isArray(booking.easyride_qr_codes) ? booking.easyride_qr_codes[0]?.qr_code_data : booking.easyride_qr_codes?.qr_code_data) && (
+                                                /**
+                                                 * View QR Code Button
+                                                 * Triggers the modal to display the QR code for the selected booking.
+                                                 */
+                                                <button
+                                                    onClick={() => setSelectedBooking({
+                                                        ...booking,
+                                                        qr_code_data: Array.isArray(booking.easyride_qr_codes) ? booking.easyride_qr_codes[0]?.qr_code_data : booking.easyride_qr_codes?.qr_code_data
+                                                    })}
+                                                    className="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                                                >
+                                                    <QrCode className="w-4 h-4" />
+                                                    View QR Code
+                                                </button>
+                                            )}
                                         </Card>
                                     ))
                                 )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* QR Code Modal */}
+                    {selectedBooking && (
+                        /**
+                         * QR Code Modal
+                         * Displays the QR code and booking details in a modal overlay.
+                         */
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setSelectedBooking(null)}>
+                            <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6" onClick={e => e.stopPropagation()}>
+                                <div className="text-center mb-6">
+                                    <h3 className="text-xl font-bold text-gray-900">Ticket QR Code</h3>
+                                    <p className="text-sm text-gray-500 mt-1">Show this to the conductor</p>
+                                </div>
+
+                                <div className="flex justify-center mb-6 p-4 bg-white rounded-lg border-2 border-dashed border-gray-200">
+                                    <QRCodeSVG
+                                        value={selectedBooking.qr_code_data}
+                                        size={200}
+                                        level="H"
+                                        includeMargin={true}
+                                    />
+                                </div>
+
+                                <div className="space-y-3 text-sm">
+                                    <div className="flex justify-between py-2 border-b border-gray-100">
+                                        <span className="text-gray-500">Route</span>
+                                        <span className="font-medium text-gray-900">{selectedBooking.easyride_bus_assignments?.easyride_routes?.name}</span>
+                                    </div>
+                                    <div className="flex justify-between py-2 border-b border-gray-100">
+                                        <span className="text-gray-500">Bus Number</span>
+                                        <span className="font-medium text-gray-900">{selectedBooking.easyride_bus_assignments?.easyride_buses?.bus_number}</span>
+                                    </div>
+                                    <div className="flex justify-between py-2 border-b border-gray-100">
+                                        <span className="text-gray-500">Seat</span>
+                                        <span className="font-medium text-gray-900">{selectedBooking.seat_number}</span>
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={() => setSelectedBooking(null)}
+                                    className="w-full mt-6 bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium py-2.5 px-4 rounded-lg transition-colors"
+                                >
+                                    Close
+                                </button>
                             </div>
                         </div>
                     )}

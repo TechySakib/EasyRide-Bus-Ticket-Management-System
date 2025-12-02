@@ -1,8 +1,5 @@
 # Current Sprint Tasks
 
-* [X] Design the database schema
-* [X] Implement User Authentication API
-* [X] Build the Frontend UI Structure
-* [ ] Build the Seat Selection Component
-* [ ] Connect the payment processing module
-* [ ] Implement Admin Dashboard Analytics
+* [X] Implement QR Code Scanner 
+* [X] Implement QR Code Generation 
+* [X] Role Based Access Control for QR Scanner & Generation

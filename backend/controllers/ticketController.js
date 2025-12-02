@@ -93,6 +93,9 @@ exports.getUserBookings = async (req, res) => {
                 journey_date,
                 booking_status,
                 seat_number,
+                easyride_qr_codes (
+                    qr_code_data
+                ),
                 easyride_bus_assignments (
                     easyride_routes (
                         name
