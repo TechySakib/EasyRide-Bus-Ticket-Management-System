@@ -1,8 +1,8 @@
+require('dotenv').config({ path: '../.env' });
 const express = require('express');
 const cors = require('cors');
 const authMiddleware = require('./middleware/auth');
 const userRoutes = require('./routes/userRoutes');
-require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -28,6 +28,8 @@ app.get('/api/protected', authMiddleware, (req, res) => {
 app.use('/api/users', userRoutes);
 const routeRoutes = require('./routes/routeRoutes');
 app.use('/api/routes', routeRoutes);
+const ticketRoutes = require('./routes/ticketRoutes');
+app.use('/api/tickets', ticketRoutes);
 
 
 app.listen(port, () => {
