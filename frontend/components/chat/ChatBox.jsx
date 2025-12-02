@@ -38,7 +38,7 @@ export default function ChatBox({ isOpen, onClose }) {
     const messagesEndRef = useRef(null)
 
     // Controller: Handle message sending
-    const handleSendMessage = (e) => {
+    const handleSendMessage = async (e) => {
         e.preventDefault()
         if (!inputText.trim()) return
 
@@ -50,20 +50,52 @@ export default function ChatBox({ isOpen, onClose }) {
             timestamp: new Date()
         }
 
-        setMessages(prev => [...prev, newUserMessage])
+        const updatedMessages = [...messages, newUserMessage]
+        setMessages(updatedMessages)
         setInputText("")
         setIsTyping(true)
 
-        // Simulate agent response
-        setTimeout(() => {
-            setIsTyping(false)
+        try {
+            // Prepare history for API
+            const history = updatedMessages.map(msg => ({
+                role: msg.sender === 'user' ? 'user' : 'assistant',
+                content: msg.text
+            })).slice(-10); // Keep last 10 messages for context
+
+            const response = await fetch('http://localhost:5000/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: newUserMessage.text,
+                    history: history
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setMessages(prev => [...prev, {
+                    id: prev.length + 1,
+                    text: data.reply,
+                    sender: "agent",
+                    timestamp: new Date()
+                }])
+            } else {
+                throw new Error(data.message || "Failed to get response")
+            }
+        } catch (error) {
+            console.error("Chat Error:", error)
             setMessages(prev => [...prev, {
                 id: prev.length + 1,
-                text: "Thanks for your message! I'm checking that for you.",
+                text: "Sorry, I'm having trouble connecting right now. Please try again later.",
                 sender: "agent",
                 timestamp: new Date()
             }])
-        }, 1500)
+        } finally {
+            setIsTyping(false)
+        }
     }
 
     // Auto-scroll to bottom
@@ -136,8 +168,8 @@ export default function ChatBox({ isOpen, onClose }) {
 
                         <div
                             className={`max-w-[75%] p-4 rounded-2xl text-sm shadow-sm relative group transition-all hover:shadow-md ${msg.sender === 'user'
-                                    ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white rounded-br-none'
-                                    : 'bg-white text-gray-700 border border-gray-100/50 rounded-bl-none'
+                                ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white rounded-br-none'
+                                : 'bg-white text-gray-700 border border-gray-100/50 rounded-bl-none'
                                 }`}
                         >
                             <p className="leading-relaxed">{msg.text}</p>
