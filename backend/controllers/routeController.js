@@ -1,5 +1,7 @@
 const RouteModel = require('../models/routeModel');
+require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
 const fs = require('fs');
+const path = require('path');
 
 /**
  * Route Controller
