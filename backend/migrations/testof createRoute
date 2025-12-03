@@ -1,0 +1,11 @@
+PASS  test/createRoute.test.js
+  RouteController.createRouteFromLocation
+    √ should return 400 if locationName is missing (3 ms)
+    √ should create a new route if it does not exist (1 ms)
+    √ should return existing route if it already exists (1 ms)
+    √ should handle errors (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        1.234 s
