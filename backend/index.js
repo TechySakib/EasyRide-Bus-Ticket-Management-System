@@ -7,6 +7,11 @@ const userRoutes = require('./routes/userRoutes');
 const app = express();
 const port = process.env.PORT || 5000;
 
+/**
+ * Main Application Entry Point
+ * Configures Express server, middleware, and routes.
+ */
+
 
 app.use(cors());
 app.use(express.json());
@@ -32,6 +37,8 @@ const ticketRoutes = require('./routes/ticketRoutes');
 app.use('/api/tickets', ticketRoutes);
 const busAssignmentRoutes = require('./routes/busAssignmentRoutes');
 app.use('/api/assignments', busAssignmentRoutes);
+const chatRoutes = require('./routes/chatRoutes');
+app.use('/api', chatRoutes);
 
 
 app.listen(port, () => {

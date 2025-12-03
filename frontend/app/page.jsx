@@ -10,6 +10,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
 
+/**
+ * Login Page
+ * Handles user authentication via email and password.
+ * Redirects to dashboard upon successful login.
+ * 
+ * @component
+ * @returns {JSX.Element} Login UI
+ */
 export default function LoginPage() {
     const router = useRouter()
     const [email, setEmail] = useState("")
@@ -18,7 +26,7 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
 
-    
+
     useEffect(() => {
         const checkUser = async () => {
             const { data: { session } } = await supabase.auth.getSession()
@@ -44,8 +52,8 @@ export default function LoginPage() {
                 throw error
             }
 
-            
-            router.push("/dashboard") 
+
+            router.push("/dashboard")
         } catch (err) {
             setError(err.message)
         } finally {

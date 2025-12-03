@@ -1,8 +1,18 @@
-# Current Sprint Tasks
+# Chatbot Feature Checklist
 
-* [X] Design the database schema
-* [X] Implement User Authentication API
-* [X] Build the Frontend UI Structure
-* [ ] Build the Seat Selection Component
-* [ ] Connect the payment processing module
-* [ ] Implement Admin Dashboard Analytics
+## Core Functionality
+- [x] **Chat Interface**: Modern, glassmorphism UI with floating action button.
+- [x] **OpenAI Integration**: Realtime API integration using WebSockets for low-latency communication.
+- [x] **Context Awareness**: Bot has access to user profile, role, and active bookings.
+
+## Tools & Actions
+- [x] **Support Tickets**:
+    - [x] Create tickets with inferred title and priority.
+
+- [x] **Trip Management**:
+    - [x] Search for available bus trips.
+
+## Technical & Quality
+- [x] **Security**: Auth middleware to protect chat routes and verify user identity.
+- [x] **Documentation**: JSDoc added to all backend and frontend files.
+- [x] **UX**: "Sakib Al Hasan" persona with personalized greetings and online status.

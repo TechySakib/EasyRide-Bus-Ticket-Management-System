@@ -4,7 +4,11 @@ const RouteController = require('../controllers/routeController');
 
 const router = express.Router();
 
-// Create routes from a location name (Admin only)
+/**
+ * POST /api/routes/create-from-location
+ * Creates routes from a location name.
+ * Protected by Admin Middleware.
+ */
 router.post('/create-from-location', requireAdmin, RouteController.createRouteFromLocation);
 
 module.exports = router;

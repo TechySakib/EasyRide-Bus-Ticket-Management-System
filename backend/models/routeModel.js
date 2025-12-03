@@ -10,8 +10,18 @@ if (!supabaseServiceKey) {
 
 const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey || 'placeholder');
 
+/**
+ * Route Model
+ * Handles database interactions for locations and routes.
+ */
 const RouteModel = {
-    // Create a new location if it doesn't exist
+    /**
+     * Creates a new location if it doesn't exist.
+     * 
+     * @param {string} name - Name of the location
+     * @returns {Promise<Object>} The location object
+     * @throws {Error} If database operation fails
+     */
     createLocation: async (name) => {
         try {
             // First check if it exists
@@ -45,7 +55,19 @@ const RouteModel = {
         }
     },
 
-    // Create a new route
+    /**
+     * Creates a new route in the database.
+     * 
+     * @param {Object} routeData - Route data object
+     * @param {string} routeData.name - Route name
+     * @param {number} routeData.origin_id - Origin location ID
+     * @param {number} routeData.destination_id - Destination location ID
+     * @param {number} routeData.distance_km - Distance in km
+     * @param {number} routeData.estimated_time_minutes - Estimated time in minutes
+     * @param {string} routeData.route_status - Status of the route
+     * @returns {Promise<Object>} The created route object
+     * @throws {Error} If database operation fails
+     */
     createRoute: async (routeData) => {
         const { data, error } = await supabaseAdmin
             .from('easyride_routes')
@@ -60,7 +82,13 @@ const RouteModel = {
         return data;
     },
 
-    // Check if route exists
+    /**
+     * Finds a route between two locations.
+     * 
+     * @param {number} originId - Origin location ID
+     * @param {number} destinationId - Destination location ID
+     * @returns {Promise<Object|null>} The route object if found, otherwise null
+     */
     findRoute: async (originId, destinationId) => {
         const { data, error } = await supabaseAdmin
             .from('easyride_routes')
