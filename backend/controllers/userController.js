@@ -4,6 +4,12 @@ const { ROLES } = require('../middleware/roleMiddleware');
 
 const UserController = {
 
+    /**
+     * Creates a new user.
+     * @param {import('express').Request} req - The Express request object.
+     * @param {import('express').Response} res - The Express response object.
+     * @returns {Promise<void>}
+     */
     createUser: async (req, res) => {
         try {
             console.log('Received create user request:', req.body);
@@ -73,6 +79,12 @@ const UserController = {
     },
 
 
+    /**
+     * Lists all users.
+     * @param {import('express').Request} req - The Express request object.
+     * @param {import('express').Response} res - The Express response object.
+     * @returns {Promise<void>}
+     */
     listUsers: async (req, res) => {
         try {
             const { data, error } = await UserModel.listUsers();
@@ -101,6 +113,12 @@ const UserController = {
     },
 
 
+    /**
+     * Updates the password for the authenticated user.
+     * @param {import('express').Request} req - The Express request object.
+     * @param {import('express').Response} res - The Express response object.
+     * @returns {Promise<void>}
+     */
     updatePassword: async (req, res) => {
         try {
             const authHeader = req.headers.authorization;
@@ -150,6 +168,12 @@ const UserController = {
     },
 
 
+    /**
+     * Updates the role of a user.
+     * @param {import('express').Request} req - The Express request object.
+     * @param {import('express').Response} res - The Express response object.
+     * @returns {Promise<void>}
+     */
     updateRole: async (req, res) => {
         try {
             const { userId, newRole } = req.body;
@@ -196,6 +220,12 @@ const UserController = {
     },
 
 
+    /**
+     * Initiates the forgot password process.
+     * @param {import('express').Request} req - The Express request object.
+     * @param {import('express').Response} res - The Express response object.
+     * @returns {Promise<void>}
+     */
     forgotPassword: async (req, res) => {
         try {
             const { email } = req.body;

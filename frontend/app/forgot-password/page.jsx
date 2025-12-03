@@ -8,6 +8,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
 
+/**
+ * ForgotPasswordPage component.
+ * A page for users to request a password reset link.
+ * @returns {JSX.Element} The rendered forgot password page.
+ */
 export default function ForgotPasswordPage() {
     const [email, setEmail] = useState("")
     const [loading, setLoading] = useState(false)

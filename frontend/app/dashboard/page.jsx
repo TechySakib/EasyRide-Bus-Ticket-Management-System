@@ -34,6 +34,13 @@ import UserProfileDialog from "@/components/user/UserProfileDialog"
 import { isAdmin, getUserRole, getRoleLabel, getRoleColor, ROLES } from "@/lib/roles"
 import { logUserRole } from "../actions"
 
+/**
+ * DashboardPage component.
+ * The main dashboard for authenticated users.
+ * Displays user information, navigation, and features like bus tracking and booking.
+ * Handles user session validation and secure sign-out functionality.
+ * @returns {JSX.Element|null} The rendered dashboard page or null if loading/unauthenticated.
+ */
 export default function DashboardPage() {
     const router = useRouter()
     const [user, setUser] = useState(null)
@@ -68,7 +75,7 @@ export default function DashboardPage() {
             } else {
                 setUser(session.user)
 
-                
+
                 const { data: profile } = await supabase
                     .from('profiles')
                     .select('role')
@@ -80,7 +87,7 @@ export default function DashboardPage() {
                     console.log("User Role:", profile.role)
                     logUserRole(profile.role)
                 } else {
-                    
+
                     const role = getUserRole(session.user)
                     setUserRole(role)
                     console.log("User Role:", role)
@@ -105,7 +112,7 @@ export default function DashboardPage() {
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans">
-            {}
+            { }
             <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
@@ -138,7 +145,7 @@ export default function DashboardPage() {
                         </nav>
 
                         <div className="flex items-center gap-4">
-                            {}
+                            { }
                             {userRole === ROLES.ADMIN && (
                                 <AdminPanel />
                             )}
@@ -150,7 +157,7 @@ export default function DashboardPage() {
                                 </span>
                             </button>
 
-                            {}
+                            { }
                             <div className="relative">
                                 <div
                                     className="flex items-center gap-2 cursor-pointer"
@@ -173,10 +180,10 @@ export default function DashboardPage() {
                                     <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
                                 </div>
 
-                                {}
+                                { }
                                 {showUserMenu && (
                                     <>
-                                        {}
+                                        { }
                                         <div
                                             className="fixed inset-0 z-40"
                                             onClick={() => setShowUserMenu(false)}
@@ -205,8 +212,22 @@ export default function DashboardPage() {
                                             <div className="border-t border-gray-100 my-1" />
                                             <button
                                                 onClick={async () => {
-                                                    await supabase.auth.signOut()
-                                                    router.push("/")
+                                                    try {
+                                                        await supabase.auth.signOut()
+                                                    } catch (error) {
+                                                        console.error("Error signing out:", error)
+                                                        // Force local signout if server signout failed (e.g. invalid session)
+                                                        await supabase.auth.signOut({ scope: 'local' })
+                                                    } finally {
+                                                        // Manually clear any remaining Supabase keys from localStorage
+                                                        for (let key in localStorage) {
+                                                            if (key.startsWith('sb-')) {
+                                                                localStorage.removeItem(key)
+                                                            }
+                                                        }
+                                                        // Force a hard reload to clear any in-memory state
+                                                        window.location.href = "/"
+                                                    }
                                                 }}
                                                 className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"
                                             >
@@ -223,7 +244,7 @@ export default function DashboardPage() {
             </header>
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {}
+                { }
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
                     <div className="space-y-8">
                         <div>
@@ -336,7 +357,7 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="relative h-[400px] lg:h-[500px] w-full rounded-3xl overflow-hidden shadow-2xl">
-                        {}
+                        { }
                         <Image
                             src="/bus.png"
                             alt="University Bus"
@@ -348,7 +369,7 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                {}
+                { }
                 <div className="text-center mb-16">
                     <h2 className="text-2xl font-bold text-gray-900 mb-2">Why Choose EasyRide?</h2>
                     <p className="text-gray-500">Experience seamless bus travel with our modern features</p>
@@ -378,7 +399,7 @@ export default function DashboardPage() {
                 </div>
             </main>
 
-            {}
+            { }
             <div className="fixed bottom-6 right-6 flex items-end gap-2 z-50">
                 <button className="bg-black text-white p-2 rounded-full shadow-lg hover:bg-gray-800 transition-colors">
                     <HelpCircle className="h-5 w-5" />
@@ -388,13 +409,13 @@ export default function DashboardPage() {
                 </button>
             </div>
 
-            {}
+            { }
             <ChangePasswordDialog
                 isOpen={showPasswordDialog}
                 onClose={() => setShowPasswordDialog(false)}
             />
 
-            {}
+            { }
             <UserProfileDialog
                 isOpen={showProfileDialog}
                 onClose={() => setShowProfileDialog(false)}
@@ -403,6 +424,15 @@ export default function DashboardPage() {
     )
 }
 
+/**
+ * FeatureCard component.
+ * Renders a card displaying a feature with an icon, title, and description.
+ * @param {Object} props - The component props.
+ * @param {React.ReactNode} props.icon - The icon to display.
+ * @param {string} props.title - The title of the feature.
+ * @param {string} props.description - The description of the feature.
+ * @returns {JSX.Element} The rendered feature card.
+ */
 function FeatureCard({ icon, title, description }) {
     return (
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">

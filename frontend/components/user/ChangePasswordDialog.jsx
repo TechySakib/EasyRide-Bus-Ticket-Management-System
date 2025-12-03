@@ -6,6 +6,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { X, Eye, EyeOff, Lock } from "lucide-react"
 
+/**
+ * ChangePasswordDialog component.
+ * A dialog form for users to change their password.
+ * @param {Object} props - The component props.
+ * @param {boolean} props.isOpen - Whether the dialog is open.
+ * @param {function} props.onClose - Function to close the dialog.
+ * @returns {JSX.Element|null} The rendered dialog or null if not open.
+ */
 export default function ChangePasswordDialog({ isOpen, onClose }) {
     const [currentPassword, setCurrentPassword] = useState("")
     const [newPassword, setNewPassword] = useState("")
@@ -22,7 +30,7 @@ export default function ChangePasswordDialog({ isOpen, onClose }) {
         setError("")
         setSuccess(false)
 
-        
+
         if (!currentPassword || !newPassword || !confirmPassword) {
             setError("All fields are required")
             return
@@ -46,7 +54,7 @@ export default function ChangePasswordDialog({ isOpen, onClose }) {
         setLoading(true)
 
         try {
-            
+
             const { data: { session } } = await supabase.auth.getSession()
 
             if (!session) {
@@ -55,7 +63,7 @@ export default function ChangePasswordDialog({ isOpen, onClose }) {
                 return
             }
 
-            
+
             const { error: signInError } = await supabase.auth.signInWithPassword({
                 email: session.user.email,
                 password: currentPassword
@@ -67,7 +75,7 @@ export default function ChangePasswordDialog({ isOpen, onClose }) {
                 return
             }
 
-            
+
             const response = await fetch('http://localhost:5000/api/users/update-password', {
                 method: 'POST',
                 headers: {
@@ -92,7 +100,7 @@ export default function ChangePasswordDialog({ isOpen, onClose }) {
             setNewPassword("")
             setConfirmPassword("")
 
-            
+
             setTimeout(() => {
                 onClose()
                 setSuccess(false)
@@ -120,7 +128,7 @@ export default function ChangePasswordDialog({ isOpen, onClose }) {
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
-                {}
+                { }
                 <button
                     onClick={handleClose}
                     className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
@@ -128,7 +136,7 @@ export default function ChangePasswordDialog({ isOpen, onClose }) {
                     <X className="h-5 w-5" />
                 </button>
 
-                {}
+                { }
                 <div className="flex items-center gap-3 mb-6">
                     <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
                         <Lock className="h-6 w-6 text-blue-600" />
@@ -139,9 +147,9 @@ export default function ChangePasswordDialog({ isOpen, onClose }) {
                     </div>
                 </div>
 
-                {}
+                { }
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {}
+                    { }
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">Current Password</label>
                         <div className="relative">
@@ -166,7 +174,7 @@ export default function ChangePasswordDialog({ isOpen, onClose }) {
                         </div>
                     </div>
 
-                    {}
+                    { }
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">New Password</label>
                         <div className="relative">
@@ -191,7 +199,7 @@ export default function ChangePasswordDialog({ isOpen, onClose }) {
                         </div>
                     </div>
 
-                    {}
+                    { }
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">Confirm New Password</label>
                         <div className="relative">
@@ -216,21 +224,21 @@ export default function ChangePasswordDialog({ isOpen, onClose }) {
                         </div>
                     </div>
 
-                    {}
+                    { }
                     {error && (
                         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
                             {error}
                         </div>
                     )}
 
-                    {}
+                    { }
                     {success && (
                         <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
                             Password updated successfully!
                         </div>
                     )}
 
-                    {}
+                    { }
                     <div className="flex gap-3 pt-2">
                         <Button
                             type="button"

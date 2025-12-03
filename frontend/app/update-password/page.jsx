@@ -9,6 +9,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
 
+/**
+ * UpdatePasswordPage component.
+ * A page for users to set a new password after clicking a reset link.
+ * @returns {JSX.Element} The rendered update password page.
+ */
 export default function UpdatePasswordPage() {
     const router = useRouter()
     const [password, setPassword] = useState("")

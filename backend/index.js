@@ -4,6 +4,10 @@ const authMiddleware = require('./middleware/auth');
 const userRoutes = require('./routes/userRoutes');
 require('dotenv').config();
 
+/**
+ * Express application instance.
+ * @type {import('express').Application}
+ */
 const app = express();
 const port = process.env.PORT || 5000;
 
