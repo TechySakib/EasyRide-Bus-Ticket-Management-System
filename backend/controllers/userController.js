@@ -1,16 +1,19 @@
 const UserModel = require('../models/userModel');
 const { ROLES } = require('../middleware/roleMiddleware');
 
-
 /**
  * User Controller
  * Handles user management operations including creation, listing, and updates.
+ * @namespace UserController
  */
 const UserController = {
 
     /**
      * Creates a new user with specified role and metadata.
      * 
+     * @async
+     * @function createUser
+     * @memberof UserController
      * @param {Object} req - Express request object
      * @param {Object} req.body - Request body
      * @param {string} req.body.email - User email
@@ -94,6 +97,9 @@ const UserController = {
     /**
      * Lists all users in the system.
      * 
+     * @async
+     * @function listUsers
+     * @memberof UserController
      * @param {Object} req - Express request object
      * @param {Object} res - Express response object
      * @returns {Promise<void>} JSON response with list of users
@@ -129,6 +135,9 @@ const UserController = {
     /**
      * Updates the password for the authenticated user.
      * 
+     * @async
+     * @function updatePassword
+     * @memberof UserController
      * @param {Object} req - Express request object
      * @param {Object} req.headers - Request headers
      * @param {string} req.headers.authorization - Bearer token
@@ -189,6 +198,9 @@ const UserController = {
     /**
      * Updates the role of a specific user.
      * 
+     * @async
+     * @function updateRole
+     * @memberof UserController
      * @param {Object} req - Express request object
      * @param {Object} req.body - Request body
      * @param {string} req.body.userId - ID of the user to update
@@ -237,6 +249,51 @@ const UserController = {
             });
         } catch (err) {
             console.error('Update role error:', err);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    },
+
+    /**
+     * Logs user access to the scan page.
+     * 
+     * @async
+     * @function logAccess
+     * @memberof UserController
+     * @param {Object} req - Express request object
+     * @param {Object} res - Express response object
+     * @returns {Promise<void>} Sends JSON response
+     */
+    logAccess: async (req, res) => {
+        try {
+            const authHeader = req.headers.authorization;
+            if (!authHeader || !authHeader.startsWith('Bearer ')) {
+                return res.status(401).json({ error: 'Missing or invalid authorization header' });
+            }
+
+            const token = authHeader.split(' ')[1];
+            const { data: { user }, error } = await UserModel.getUserByToken(token);
+
+            if (error || !user) {
+                console.log('Access Log: Unauthenticated access attempt');
+                return res.status(401).json({ error: 'Invalid token' });
+            }
+
+            const role = user.user_metadata?.role || 'passenger';
+            const logMessage = `[${new Date().toISOString()}] User: ${user.email}, Role: ${role} accessed Scan Page\n`;
+
+            console.log('Access Log:', logMessage.trim());
+
+            const fs = require('fs');
+            const path = require('path');
+            const logPath = path.join(__dirname, '../access.log');
+
+            fs.appendFile(logPath, logMessage, (err) => {
+                if (err) console.error('Failed to write to access log:', err);
+            });
+
+            res.json({ success: true, role });
+        } catch (err) {
+            console.error('Log access error:', err);
             res.status(500).json({ error: 'Internal server error' });
         }
     }

@@ -1,3 +1,9 @@
+/**
+ * Role Middleware
+ * Handles role-based access control.
+ * @module middleware/roleMiddleware
+ */
+
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
 
@@ -6,16 +12,15 @@ const supabaseKey = process.env.SUPABASE_ANON_KEY || 'sb_publishable_Qpg550_nF9G
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-
 /**
- * Role Definitions
+ * User Roles Enum
+ * @readonly
  * @enum {string}
  */
 const ROLES = {
     PASSENGER: 'passenger',
     ADMIN: 'admin',
     CONDUCTOR: 'conductor',
-
     STUDENT: 'student'
 };
 
@@ -23,6 +28,7 @@ const ROLES = {
 /**
  * Normalizes user roles (e.g., maps 'student' to 'passenger').
  * 
+ * @function normalizeRole
  * @param {string} role - The role to normalize
  * @returns {string} Normalized role
  */
@@ -37,6 +43,7 @@ const normalizeRole = (role) => {
 /**
  * Middleware factory to restrict access based on user roles.
  * 
+ * @function requireRole
  * @param {string|string[]} allowedRoles - Single role or array of allowed roles
  * @returns {Function} Express middleware function
  */
@@ -103,12 +110,24 @@ const requireRole = (allowedRoles) => {
 };
 
 
+/**
+ * Middleware requiring Admin role.
+ * @constant
+ */
 const requireAdmin = requireRole(ROLES.ADMIN);
 
 
+/**
+ * Middleware requiring Admin or Conductor role.
+ * @constant
+ */
 const requireAdminOrConductor = requireRole([ROLES.ADMIN, ROLES.CONDUCTOR]);
 
 
+/**
+ * Middleware requiring any valid role (Passenger, Admin, Conductor).
+ * @constant
+ */
 const requireAnyRole = requireRole([ROLES.PASSENGER, ROLES.ADMIN, ROLES.CONDUCTOR]);
 
 module.exports = {

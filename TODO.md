@@ -1,5 +1,11 @@
 # Chatbot Feature Checklist
 
+## Current Sprint Tasks
+* [X] Implement QR Code Scanner 
+* [X] Implement QR Code Generation 
+* [X] Role Based Access Control for QR Scanner & Generation
+* [X] Test Case with Jest
+
 ## Core Functionality
 - [x] **Chat Interface**: Modern, glassmorphism UI with floating action button.
 - [x] **OpenAI Integration**: Realtime API integration using WebSockets for low-latency communication.
