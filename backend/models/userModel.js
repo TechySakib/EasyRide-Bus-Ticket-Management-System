@@ -35,6 +35,13 @@ const UserModel = {
     
     updateUserById: async (userId, updates) => {
         return await supabaseAdmin.auth.admin.updateUserById(userId, updates);
+    },
+
+    
+    resetPasswordForEmail: async (email) => {
+        return await supabaseAdmin.auth.resetPasswordForEmail(email, {
+            redirectTo: 'http://localhost:3000/update-password',
+        });
     }
 };
 

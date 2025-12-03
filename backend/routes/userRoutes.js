@@ -13,6 +13,7 @@ router.get('/list', requireAdmin, UserController.listUsers);
 
 router.post('/update-password', UserController.updatePassword);
 
+router.post('/forgot-password', UserController.forgotPassword);
 
 router.post('/update-role', requireAdmin, UserController.updateRole);
 
