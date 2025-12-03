@@ -18,6 +18,9 @@ const UserController = {
             res.json({ success: true, message: 'OTP sent successfully', otp });
         } catch (err) {
             console.error('Send OTP error:', err);
+            if (err.message === 'Number is not valid') {
+                return res.status(400).json({ error: 'Number is not valid' });
+            }
             res.status(500).json({ error: 'Internal server error' });
         }
     },

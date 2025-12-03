@@ -183,7 +183,6 @@ export default function SignupPage() {
                                     maxLength={6}
                                 />
                             </div>
-                            <p className="text-xs text-gray-500">Check console for dummy OTP</p>
                         </div>
                     )}
 

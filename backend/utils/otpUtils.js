@@ -17,12 +17,30 @@ const generateOTP = () => {
 };
 
 /**
+ * Validates a Bangladeshi phone number.
+ * Supports formats: 01xxxxxxxxx, 8801xxxxxxxxx, +8801xxxxxxxxx.
+ * 
+ * @param {string} phone - The phone number to validate.
+ * @returns {boolean} True if the phone number is valid, false otherwise.
+ */
+const validatePhoneNumber = (phone) => {
+    const regex = /^(?:\+88|88)?(01[3-9]\d{8})$/;
+    return regex.test(phone);
+};
+
+/**
  * Sends an OTP to the specified phone number using BulkSMSBD API.
+ * Validates the phone number before sending.
  * 
  * @param {string} phone - The phone number to send the OTP to.
  * @returns {Promise<string>} The generated OTP.
+ * @throws {Error} If the phone number is invalid (throws "Number is not valid").
  */
 const sendOTP = async (phone) => {
+    if (!validatePhoneNumber(phone)) {
+        throw new Error('Number is not valid');
+    }
+
     const otp = generateOTP();
     const expires = Date.now() + 5 * 60 * 1000;
     otpStore.set(phone, { otp, expires });
