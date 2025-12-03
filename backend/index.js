@@ -4,7 +4,7 @@
  * @module index
  */
 
-require('dotenv').config({ path: '../.env' });
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const authMiddleware = require('./middleware/auth');
