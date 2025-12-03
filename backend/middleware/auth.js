@@ -13,9 +13,21 @@ const supabaseKey = process.env.SUPABASE_ANON_KEY || 'sb_publishable_Qpg550_nF9G
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+/**
+ * Authentication Middleware
+ * Verifies the JWT token from the Authorization header using Supabase Auth.
+ * Attaches the user object to the request if successful.
+ * 
+ * @param {Object} req - Express request object
+ * @param {Object} req.headers - Request headers
+ * @param {string} req.headers.authorization - Bearer token
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ * @returns {Promise<void>} Calls next() if authenticated, otherwise sends 401/500 response
+ */
 const authMiddleware = async (req, res, next) => {
     try {
-        
+
         const authHeader = req.headers.authorization;
 
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -24,7 +36,7 @@ const authMiddleware = async (req, res, next) => {
 
         const token = authHeader.split(' ')[1];
 
-        
+
         const { data: { user }, error } = await supabase.auth.getUser(token);
 
         if (error || !user) {
@@ -32,7 +44,7 @@ const authMiddleware = async (req, res, next) => {
             return res.status(401).json({ error: 'Invalid or expired token' });
         }
 
-        
+
         req.user = user;
         next();
     } catch (err) {

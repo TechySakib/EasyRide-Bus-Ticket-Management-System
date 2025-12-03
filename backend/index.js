@@ -7,6 +7,11 @@ const userRoutes = require('./routes/userRoutes');
 const app = express();
 const port = process.env.PORT || 5000;
 
+/**
+ * Main Application Entry Point
+ * Configures Express server, middleware, and routes.
+ */
+
 
 app.use(cors());
 app.use(express.json());
@@ -32,9 +37,14 @@ const ticketRoutes = require('./routes/ticketRoutes');
 app.use('/api/tickets', ticketRoutes);
 const busAssignmentRoutes = require('./routes/busAssignmentRoutes');
 app.use('/api/assignments', busAssignmentRoutes);
+<<<<<<< HEAD
 const rechargeRoutes = require('./routes/rechargeRoutes');
 app.use('/api/recharge', rechargeRoutes);
 
+=======
+const chatRoutes = require('./routes/chatRoutes');
+app.use('/api', chatRoutes);
+>>>>>>> 06ee2da3249c306ba59be0e4a8203d283c2478c0
 
 
 app.listen(port, () => {

@@ -2,14 +2,32 @@ const UserModel = require('../models/userModel');
 const { ROLES } = require('../middleware/roleMiddleware');
 
 
+/**
+ * User Controller
+ * Handles user management operations including creation, listing, and updates.
+ */
 const UserController = {
-    
+
+    /**
+     * Creates a new user with specified role and metadata.
+     * 
+     * @param {Object} req - Express request object
+     * @param {Object} req.body - Request body
+     * @param {string} req.body.email - User email
+     * @param {string} req.body.password - User password (min 6 chars)
+     * @param {string} req.body.role - User role (passenger, admin, conductor)
+     * @param {string} [req.body.name] - User full name
+     * @param {string} [req.body.phone] - User phone number
+     * @param {string} [req.body.studentId] - Student ID (if applicable)
+     * @param {Object} res - Express response object
+     * @returns {Promise<void>} JSON response with created user or error
+     */
     createUser: async (req, res) => {
         try {
             console.log('Received create user request:', req.body);
             const { email, password, role, name, phone, studentId } = req.body;
 
-            
+
             if (!email || !password || !role) {
                 console.log('Missing required fields:', { email: !!email, password: !!password, role: !!role });
                 return res.status(400).json({
@@ -18,7 +36,7 @@ const UserController = {
                 });
             }
 
-            
+
             const validRoles = [ROLES.PASSENGER, ROLES.ADMIN, ROLES.CONDUCTOR];
             if (!validRoles.includes(role)) {
                 console.log('Invalid role:', role, 'Valid roles:', validRoles);
@@ -28,14 +46,14 @@ const UserController = {
                 });
             }
 
-            
+
             if (password.length < 6) {
                 return res.status(400).json({
                     error: 'Password must be at least 6 characters'
                 });
             }
 
-            
+
             const { data, error } = await UserModel.createUser({
                 email,
                 password,
@@ -54,7 +72,7 @@ const UserController = {
                 });
             }
 
-            
+
             res.status(201).json({
                 success: true,
                 user: {
@@ -72,7 +90,14 @@ const UserController = {
         }
     },
 
-    
+
+    /**
+     * Lists all users in the system.
+     * 
+     * @param {Object} req - Express request object
+     * @param {Object} res - Express response object
+     * @returns {Promise<void>} JSON response with list of users
+     */
     listUsers: async (req, res) => {
         try {
             const { data, error } = await UserModel.listUsers();
@@ -82,7 +107,7 @@ const UserController = {
                 return res.status(400).json({ error: error.message });
             }
 
-            
+
             const users = data.users.map(user => ({
                 id: user.id,
                 email: user.email,
@@ -100,7 +125,18 @@ const UserController = {
         }
     },
 
-    
+
+    /**
+     * Updates the password for the authenticated user.
+     * 
+     * @param {Object} req - Express request object
+     * @param {Object} req.headers - Request headers
+     * @param {string} req.headers.authorization - Bearer token
+     * @param {Object} req.body - Request body
+     * @param {string} req.body.newPassword - New password
+     * @param {Object} res - Express response object
+     * @returns {Promise<void>} JSON response with success message or error
+     */
     updatePassword: async (req, res) => {
         try {
             const authHeader = req.headers.authorization;
@@ -149,7 +185,17 @@ const UserController = {
         }
     },
 
-    
+
+    /**
+     * Updates the role of a specific user.
+     * 
+     * @param {Object} req - Express request object
+     * @param {Object} req.body - Request body
+     * @param {string} req.body.userId - ID of the user to update
+     * @param {string} req.body.newRole - New role to assign
+     * @param {Object} res - Express response object
+     * @returns {Promise<void>} JSON response with updated user or error
+     */
     updateRole: async (req, res) => {
         try {
             const { userId, newRole } = req.body;

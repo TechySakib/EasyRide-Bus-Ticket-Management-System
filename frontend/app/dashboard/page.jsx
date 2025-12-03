@@ -36,7 +36,16 @@ import MyIssuesDialog from "@/components/user/MyIssuesDialog"
 import { isAdmin, getUserRole, getRoleLabel, getRoleColor, ROLES } from "@/lib/roles"
 import { logUserRole } from "../actions"
 import ConductorDashboard from "@/components/conductor/ConductorDashboard"
+import ChatBox from "@/components/chat/ChatBox"
 
+/**
+ * Dashboard Page
+ * Main landing page for authenticated users.
+ * Displays user stats, booking options, and access to other features.
+ * 
+ * @component
+ * @returns {JSX.Element} Dashboard UI
+ */
 export default function DashboardPage() {
     const router = useRouter()
     const [user, setUser] = useState(null)
@@ -50,6 +59,7 @@ export default function DashboardPage() {
     const [showProfileDialog, setShowProfileDialog] = useState(false)
     const [showReportIssue, setShowReportIssue] = useState(false)
     const [showMyIssues, setShowMyIssues] = useState(false)
+    const [showChat, setShowChat] = useState(false)
     const [dateRange, setDateRange] = useState({ min: '', max: '' })
 
     useEffect(() => {
@@ -468,7 +478,10 @@ export default function DashboardPage() {
                         <HelpCircle className="h-5 w-5" />
                         <span>Report Issue</span>
                     </button>
-                    <button className="bg-blue-600 text-white p-4 rounded-full shadow-xl hover:bg-blue-700 transition-transform hover:scale-110">
+                    <button
+                        onClick={() => setShowChat(!showChat)}
+                        className="bg-blue-600 text-white p-4 rounded-full shadow-xl hover:bg-blue-700 transition-transform hover:scale-110"
+                    >
                         <MessageCircle className="h-6 w-6" />
                     </button>
                 </div>
@@ -494,6 +507,13 @@ export default function DashboardPage() {
             <MyIssuesDialog
                 isOpen={showMyIssues}
                 onClose={() => setShowMyIssues(false)}
+            />
+
+            {/* Chat Interface */}
+            <ChatBox
+                isOpen={showChat}
+                onClose={() => setShowChat(false)}
+                userName={user?.user_metadata?.full_name || 'User'}
             />
         </div>
     )
