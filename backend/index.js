@@ -47,6 +47,7 @@ app.get('/api/protected', authMiddleware, (req, res) => {
 
 
 app.use('/api/users', userRoutes);
+app.use('/api/bookings', require('./routes/bookingRoutes'));
 const routeRoutes = require('./routes/routeRoutes');
 app.use('/api/routes', routeRoutes);
 const ticketRoutes = require('./routes/ticketRoutes');
