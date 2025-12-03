@@ -1,11 +1,3 @@
-const WebSocket = require('ws');
-const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config();
-
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
 /**
  * Chat Controller
  * Handles interactions with the OpenAI Realtime API via WebSockets.

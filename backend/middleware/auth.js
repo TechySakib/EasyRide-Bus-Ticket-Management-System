@@ -1,5 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config();
+require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
 
 
 
@@ -8,10 +8,26 @@ require('dotenv').config();
 
 
 
-const supabaseUrl = process.env.SUPABASE_URL || 'https://arctidbknjjajstoitas.supabase.co';
-const supabaseKey = process.env.SUPABASE_ANON_KEY || 'sb_publishable_Qpg550_nF9GVcZA4CejHgA_79GIdXvk';
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+console.log('🔐 Auth Middleware Init:', {
+    url: supabaseUrl,
+    keyPresent: !!supabaseKey,
+    keyPrefix: supabaseKey ? supabaseKey.substring(0, 5) + '...' : 'none'
+});
+
+if (!supabaseUrl || !supabaseKey) {
+    console.error('❌ Missing Supabase credentials in auth middleware');
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey, {
+    auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+        detectSessionInUrl: false
+    }
+});
 
 /**
  * Authentication Middleware
