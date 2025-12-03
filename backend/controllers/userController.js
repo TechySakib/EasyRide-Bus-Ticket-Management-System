@@ -3,13 +3,13 @@ const { ROLES } = require('../middleware/roleMiddleware');
 
 /**
  * User Controller
- * Handles user management operations such as creation, listing, and updates.
+ * Handles user management operations including creation, listing, and updates.
  * @namespace UserController
  */
 const UserController = {
 
     /**
-     * Creates a new user.
+     * Creates a new user with specified role and metadata.
      * 
      * @async
      * @function createUser
@@ -17,13 +17,13 @@ const UserController = {
      * @param {Object} req - Express request object
      * @param {Object} req.body - Request body
      * @param {string} req.body.email - User email
-     * @param {string} req.body.password - User password
+     * @param {string} req.body.password - User password (min 6 chars)
      * @param {string} req.body.role - User role (passenger, admin, conductor)
      * @param {string} [req.body.name] - User full name
      * @param {string} [req.body.phone] - User phone number
      * @param {string} [req.body.studentId] - Student ID (if applicable)
      * @param {Object} res - Express response object
-     * @returns {Promise<void>} Sends JSON response with created user or error
+     * @returns {Promise<void>} JSON response with created user or error
      */
     createUser: async (req, res) => {
         try {
@@ -95,14 +95,14 @@ const UserController = {
 
 
     /**
-     * Lists all users.
+     * Lists all users in the system.
      * 
      * @async
      * @function listUsers
      * @memberof UserController
      * @param {Object} req - Express request object
      * @param {Object} res - Express response object
-     * @returns {Promise<void>} Sends JSON response with list of users
+     * @returns {Promise<void>} JSON response with list of users
      */
     listUsers: async (req, res) => {
         try {
@@ -139,10 +139,12 @@ const UserController = {
      * @function updatePassword
      * @memberof UserController
      * @param {Object} req - Express request object
+     * @param {Object} req.headers - Request headers
+     * @param {string} req.headers.authorization - Bearer token
      * @param {Object} req.body - Request body
      * @param {string} req.body.newPassword - New password
      * @param {Object} res - Express response object
-     * @returns {Promise<void>} Sends JSON response indicating success or failure
+     * @returns {Promise<void>} JSON response with success message or error
      */
     updatePassword: async (req, res) => {
         try {
@@ -194,7 +196,7 @@ const UserController = {
 
 
     /**
-     * Updates a user's role.
+     * Updates the role of a specific user.
      * 
      * @async
      * @function updateRole
@@ -204,7 +206,7 @@ const UserController = {
      * @param {string} req.body.userId - ID of the user to update
      * @param {string} req.body.newRole - New role to assign
      * @param {Object} res - Express response object
-     * @returns {Promise<void>} Sends JSON response with updated user details
+     * @returns {Promise<void>} JSON response with updated user or error
      */
     updateRole: async (req, res) => {
         try {

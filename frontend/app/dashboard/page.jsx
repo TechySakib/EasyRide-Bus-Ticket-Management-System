@@ -13,15 +13,31 @@ import {
     BadgePercent,
     CalendarDays,
     MessageCircle,
-    HelpCircle
+    HelpCircle,
+    UserPlus,
+    Bell,
+    Shield,
+    User,
+    ChevronDown,
+    UserCircle,
+    Lock,
+    LogOut,
+    Bus
 } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import DashboardHeader from "@/components/DashboardHeader"
+import AdminPanel from "@/components/admin/AdminPanel"
+import ChangePasswordDialog from "@/components/user/ChangePasswordDialog"
+import UserProfileDialog from "@/components/user/UserProfileDialog"
+import ReportIssueModal from "@/components/user/ReportIssueModal"
+import MyIssuesDialog from "@/components/user/MyIssuesDialog"
 import { isAdmin, getUserRole, getRoleLabel, getRoleColor, ROLES } from "@/lib/roles"
 import { logUserRole } from "../actions"
+import ConductorDashboard from "@/components/conductor/ConductorDashboard"
+import ChatBox from "@/components/chat/ChatBox"
 
 /**
  * Dashboard Page Component
@@ -39,7 +55,32 @@ export default function DashboardPage() {
     const [direction, setDirection] = useState('to_nsu')
     const [locations, setLocations] = useState([])
     const [selectedLocation, setSelectedLocation] = useState("")
+    const [showUserMenu, setShowUserMenu] = useState(false)
+    const [showPasswordDialog, setShowPasswordDialog] = useState(false)
+    const [showProfileDialog, setShowProfileDialog] = useState(false)
+    const [showReportIssue, setShowReportIssue] = useState(false)
+    const [showMyIssues, setShowMyIssues] = useState(false)
+    const [showChat, setShowChat] = useState(false)
+    const [dateRange, setDateRange] = useState({ min: '', max: '' })
 
+    useEffect(() => {
+        const today = new Date()
+        const max = new Date()
+        max.setDate(today.getDate() + 6)
+
+        // Format as YYYY-MM-DD using local time to avoid timezone issues
+        const formatDate = (date) => {
+            const year = date.getFullYear()
+            const month = String(date.getMonth() + 1).padStart(2, '0')
+            const day = String(date.getDate()).padStart(2, '0')
+            return `${year}-${month}-${day}`
+        }
+
+        setDateRange({
+            min: formatDate(today),
+            max: formatDate(max)
+        })
+    }, [])
 
     useEffect(() => {
         const fetchLocations = async () => {
@@ -98,12 +139,174 @@ export default function DashboardPage() {
 
     if (!user) return null
 
+    if (userRole === 'conductor') {
+        return (
+            <div className="min-h-screen bg-slate-50 font-sans">
+                <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex justify-between items-center h-16">
+                            <div className="flex items-center gap-2">
+                                <div className="bg-blue-600 p-1.5 rounded-lg">
+                                    <Bus className="h-6 w-6 text-white" />
+                                </div>
+                                <span className="text-xl font-bold text-blue-600">EasyRide</span>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <div className="text-right hidden sm:block">
+                                    <div className="text-sm font-medium text-gray-900">
+                                        {user?.user_metadata?.full_name || 'Conductor'}
+                                    </div>
+                                    <div className="text-xs font-medium text-blue-600">
+                                        Conductor
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={async () => {
+                                        await supabase.auth.signOut()
+                                        router.push("/")
+                                    }}
+                                    className="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                                >
+                                    <LogOut className="h-5 w-5" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <ConductorDashboard user={user} />
+                </main>
+            </div>
+        )
+    }
+
     return (
         <div className="min-h-screen bg-slate-50 font-sans">
-            <DashboardHeader />
+            <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-between items-center h-16">
+                        <div className="flex items-center gap-2">
+                            <div className="bg-blue-600 p-1.5 rounded-lg">
+                                <Bus className="h-6 w-6 text-white" />
+                            </div>
+                            <span className="text-xl font-bold text-blue-600">EasyRide</span>
+                        </div>
+
+                        <nav className="hidden md:flex items-center space-x-8">
+                            <Link href="/dashboard" className="text-gray-900 font-medium hover:text-blue-600 transition-colors">
+                                Book Ticket
+                            </Link>
+                            <Link href="/bookings" className="text-gray-500 font-medium hover:text-blue-600 transition-colors">
+                                My Bookings
+                            </Link>
+                            <Link href="/subscriptions" className="text-gray-500 font-medium hover:text-blue-600 transition-colors">
+                                Subscriptions
+                            </Link>
+                            <Link href="/track" className="text-gray-500 font-medium hover:text-blue-600 transition-colors">
+                                Track Bus
+                            </Link>
+                            {userRole === ROLES.ADMIN && (
+                                <Link href="/dashboard/create-user" className="text-blue-600 font-medium hover:text-blue-700 transition-colors flex items-center gap-2">
+                                    <UserPlus className="h-4 w-4" />
+                                    Add User
+                                </Link>
+                            )}
+                        </nav>
+
+                        <div className="flex items-center gap-4">
+                            {userRole === ROLES.ADMIN && (
+                                <AdminPanel />
+                            )}
+
+                            <button className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                                <Bell className="h-6 w-6" />
+                                <span className="absolute top-1.5 right-1.5 h-4 w-4 bg-emerald-500 rounded-full text-[10px] font-bold text-white flex items-center justify-center border-2 border-white">
+                                    3
+                                </span>
+                            </button>
+
+                            <div className="relative">
+                                <div
+                                    className="flex items-center gap-2 cursor-pointer"
+                                    onClick={() => setShowUserMenu(!showUserMenu)}
+                                >
+                                    <div className="text-right hidden sm:block">
+                                        <div className="text-sm font-medium text-gray-900">
+                                            {user?.user_metadata?.full_name || 'User'}
+                                        </div>
+                                        <div className="flex items-center gap-1 justify-end">
+                                            <Shield className={`h-3 w-3 text-${getRoleColor(userRole)}-600`} />
+                                            <div className={`text-xs font-medium text-${getRoleColor(userRole)}-600`}>
+                                                {getRoleLabel(userRole)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition-colors">
+                                        <User className="h-5 w-5" />
+                                    </div>
+                                    <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+                                </div>
+
+                                {showUserMenu && (
+                                    <>
+                                        <div
+                                            className="fixed inset-0 z-40"
+                                            onClick={() => setShowUserMenu(false)}
+                                        />
+                                        <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                                            <button
+                                                onClick={() => {
+                                                    setShowUserMenu(false)
+                                                    setShowProfileDialog(true)
+                                                }}
+                                                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                                            >
+                                                <UserCircle className="h-4 w-4 text-gray-500" />
+                                                My Profile
+                                            </button>
+                                            {userRole !== ROLES.ADMIN && (
+                                                <button
+                                                    onClick={() => {
+                                                        setShowUserMenu(false)
+                                                        setShowMyIssues(true)
+                                                    }}
+                                                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                                                >
+                                                    <HelpCircle className="h-4 w-4 text-gray-500" />
+                                                    My Issues
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={() => {
+                                                    setShowUserMenu(false)
+                                                    setShowPasswordDialog(true)
+                                                }}
+                                                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                                            >
+                                                <Lock className="h-4 w-4 text-gray-500" />
+                                                Change Password
+                                            </button>
+                                            <div className="border-t border-gray-100 my-1" />
+                                            <button
+                                                onClick={async () => {
+                                                    await supabase.auth.signOut()
+                                                    router.push("/")
+                                                }}
+                                                className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"
+                                            >
+                                                <LogOut className="h-4 w-4" />
+                                                Sign Out
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Hero Section */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
                     <div className="space-y-8">
                         <div>
@@ -203,6 +406,8 @@ export default function DashboardPage() {
                                         <Calendar className="absolute left-3 top-3 h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
                                         <Input
                                             type="date"
+                                            min={dateRange.min}
+                                            max={dateRange.max}
                                             className="pl-10 h-12 bg-gray-50 border-gray-200 focus:bg-white transition-all"
                                         />
                                     </div>
@@ -216,7 +421,6 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="relative h-[400px] lg:h-[500px] w-full rounded-3xl overflow-hidden shadow-2xl">
-                        {/* Bus Image */}
                         <Image
                             src="/bus.png"
                             alt="University Bus"
@@ -228,7 +432,6 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                {/* Features Section */}
                 <div className="text-center mb-16">
                     <h2 className="text-2xl font-bold text-gray-900 mb-2">Why Choose EasyRide?</h2>
                     <p className="text-gray-500">Experience seamless bus travel with our modern features</p>
@@ -258,15 +461,50 @@ export default function DashboardPage() {
                 </div>
             </main>
 
-            {/* Floating Action Buttons */}
-            <div className="fixed bottom-6 right-6 flex items-end gap-2 z-50">
-                <button className="bg-black text-white p-2 rounded-full shadow-lg hover:bg-gray-800 transition-colors">
-                    <HelpCircle className="h-5 w-5" />
-                </button>
-                <button className="bg-blue-600 text-white p-4 rounded-full shadow-xl hover:bg-blue-700 transition-transform hover:scale-110">
-                    <MessageCircle className="h-6 w-6" />
-                </button>
-            </div>
+            {userRole !== ROLES.ADMIN && (
+                <div className="fixed bottom-6 right-6 flex items-end gap-2 z-50">
+                    <button
+                        onClick={() => setShowReportIssue(true)}
+                        className="bg-red-600 text-white px-4 py-3 rounded-full shadow-lg hover:bg-red-700 transition-colors flex items-center gap-2 font-medium"
+                    >
+                        <HelpCircle className="h-5 w-5" />
+                        <span>Report Issue</span>
+                    </button>
+                    <button
+                        onClick={() => setShowChat(!showChat)}
+                        className="bg-blue-600 text-white p-4 rounded-full shadow-xl hover:bg-blue-700 transition-transform hover:scale-110"
+                    >
+                        <MessageCircle className="h-6 w-6" />
+                    </button>
+                </div>
+            )}
+
+            <ChangePasswordDialog
+                isOpen={showPasswordDialog}
+                onClose={() => setShowPasswordDialog(false)}
+            />
+
+            <UserProfileDialog
+                isOpen={showProfileDialog}
+                onClose={() => setShowProfileDialog(false)}
+            />
+
+            <ReportIssueModal
+                isOpen={showReportIssue}
+                onClose={() => setShowReportIssue(false)}
+            />
+
+            <MyIssuesDialog
+                isOpen={showMyIssues}
+                onClose={() => setShowMyIssues(false)}
+            />
+
+            {/* Chat Interface */}
+            <ChatBox
+                isOpen={showChat}
+                onClose={() => setShowChat(false)}
+                userName={user?.user_metadata?.full_name || 'User'}
+            />
         </div>
     )
 }

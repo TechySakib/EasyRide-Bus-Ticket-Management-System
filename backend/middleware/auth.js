@@ -13,15 +13,18 @@ const supabaseKey = process.env.SUPABASE_ANON_KEY || 'sb_publishable_Qpg550_nF9G
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 /**
- * Middleware to authenticate requests using Bearer token.
- * Verifies the token with Supabase and attaches the user to the request object.
+ * Authentication Middleware
+ * Verifies the JWT token from the Authorization header using Supabase Auth.
+ * Attaches the user object to the request if successful.
  * 
  * @async
  * @function authMiddleware
  * @param {Object} req - Express request object
+ * @param {Object} req.headers - Request headers
+ * @param {string} req.headers.authorization - Bearer token
  * @param {Object} res - Express response object
  * @param {Function} next - Express next middleware function
- * @returns {Promise<void>} Calls next() if authenticated, or sends 401/500 response
+ * @returns {Promise<void>} Calls next() if authenticated, otherwise sends 401/500 response
  */
 const authMiddleware = async (req, res, next) => {
     try {

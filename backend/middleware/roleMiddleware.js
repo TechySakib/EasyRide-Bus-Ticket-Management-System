@@ -21,18 +21,16 @@ const ROLES = {
     PASSENGER: 'passenger',
     ADMIN: 'admin',
     CONDUCTOR: 'conductor',
-
     STUDENT: 'student'
 };
 
 
 /**
- * Normalizes a user role string.
- * Maps 'student' to 'passenger'.
+ * Normalizes user roles (e.g., maps 'student' to 'passenger').
  * 
  * @function normalizeRole
  * @param {string} role - The role to normalize
- * @returns {string} The normalized role
+ * @returns {string} Normalized role
  */
 const normalizeRole = (role) => {
     if (role === ROLES.STUDENT) {
@@ -43,10 +41,10 @@ const normalizeRole = (role) => {
 
 
 /**
- * Creates a middleware function that restricts access to specified roles.
+ * Middleware factory to restrict access based on user roles.
  * 
  * @function requireRole
- * @param {string|string[]} allowedRoles - Role or array of roles allowed to access the route
+ * @param {string|string[]} allowedRoles - Single role or array of allowed roles
  * @returns {Function} Express middleware function
  */
 const requireRole = (allowedRoles) => {

@@ -6,8 +6,13 @@
 
 const express = require('express');
 const router = express.Router();
-const ticketController = require('../controllers/ticketController');
-const authMiddleware = require('../middleware/auth'); // Assuming you want to protect this
+const TicketController = require('../controllers/ticketController');
+const authMiddleware = require('../middleware/auth');
+
+// Apply auth middleware to all routes if appropriate, or selectively
+// For now, assuming the frontend sends the token and we might want to verify it
+// But looking at index.js, authMiddleware is used for /api/protected.
+// I will use it here as well to ensure only authenticated users can access.
 
 /**
  * Route to validate a ticket.
@@ -16,7 +21,7 @@ const authMiddleware = require('../middleware/auth'); // Assuming you want to pr
  * @memberof module:routes/ticketRoutes
  * @inner
  */
-router.post('/validate', ticketController.validateTicket);
+router.post('/validate', TicketController.validateTicket);
 
 /**
  * Route to get authenticated user's bookings.
@@ -25,6 +30,14 @@ router.post('/validate', ticketController.validateTicket);
  * @memberof module:routes/ticketRoutes
  * @inner
  */
-router.get('/my-bookings', authMiddleware, ticketController.getUserBookings);
+router.get('/my-bookings', authMiddleware, TicketController.getUserBookings);
+
+router.post('/', authMiddleware, TicketController.createTicket);
+router.get('/user/:userId', authMiddleware, TicketController.getUserTickets);
+router.get('/user/:userId/bookings', authMiddleware, TicketController.getUserBookings); // New endpoint for bookings
+router.get('/admin/all', authMiddleware, TicketController.getAllTickets); // Admin: Get all tickets
+router.patch('/:id/status', authMiddleware, TicketController.updateTicketStatus); // Admin: Update status
+router.get('/:id', authMiddleware, TicketController.getTicketDetails);
+router.post('/:id/comment', authMiddleware, TicketController.addTicketComment);
 
 module.exports = router;

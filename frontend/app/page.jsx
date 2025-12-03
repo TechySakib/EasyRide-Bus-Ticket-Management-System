@@ -14,6 +14,7 @@ import { Card } from "@/components/ui/card"
  * Login Page Component
  * The initial landing page for unauthenticated users.
  * Handles user authentication via email and password.
+ * Redirects to dashboard upon successful login.
  * 
  * @component
  * @returns {JSX.Element} The rendered login page

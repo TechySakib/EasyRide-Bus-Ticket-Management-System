@@ -10,45 +10,34 @@ const UserController = require('../controllers/userController');
 
 const router = express.Router();
 
+
 /**
- * Route to create a new user.
- * Requires Admin privileges.
- * @name POST /api/users/create
- * @function
- * @memberof module:routes/userRoutes
- * @inner
+ * POST /api/users/create
+ * Creates a new user.
+ * Protected by Admin Middleware.
  */
 router.post('/create', requireAdmin, UserController.createUser);
 
 
 /**
- * Route to list all users.
- * Requires Admin privileges.
- * @name GET /api/users/list
- * @function
- * @memberof module:routes/userRoutes
- * @inner
+ * GET /api/users/list
+ * Lists all users.
+ * Protected by Admin Middleware.
  */
 router.get('/list', requireAdmin, UserController.listUsers);
 
 
 /**
- * Route to update the current user's password.
- * @name POST /api/users/update-password
- * @function
- * @memberof module:routes/userRoutes
- * @inner
+ * POST /api/users/update-password
+ * Updates the authenticated user's password.
  */
 router.post('/update-password', UserController.updatePassword);
 
 
 /**
- * Route to update a user's role.
- * Requires Admin privileges.
- * @name POST /api/users/update-role
- * @function
- * @memberof module:routes/userRoutes
- * @inner
+ * POST /api/users/update-role
+ * Updates a user's role.
+ * Protected by Admin Middleware.
  */
 router.post('/update-role', requireAdmin, UserController.updateRole);
 
@@ -63,4 +52,3 @@ router.post('/update-role', requireAdmin, UserController.updateRole);
 router.post('/log-access', UserController.logAccess);
 
 module.exports = router;
-
