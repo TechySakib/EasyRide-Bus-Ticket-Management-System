@@ -8,6 +8,17 @@ import { Label } from "@/components/ui/label"
 import { Select } from "@/components/ui/select"
 import { ROLES } from "@/lib/roles"
 
+/**
+ * Create User Dialog Component
+ * A modal form for admins to create new users.
+ * 
+ * @component
+ * @param {Object} props - Component props
+ * @param {boolean} props.isOpen - Controls the visibility of the dialog
+ * @param {Function} props.onClose - Callback function to close the dialog
+ * @param {Function} [props.onUserCreated] - Callback function called after successful user creation
+ * @returns {JSX.Element|null} The rendered dialog or null if not open
+ */
 export default function CreateUserDialog({ isOpen, onClose, onUserCreated }) {
     const [formData, setFormData] = useState({
         name: "",
@@ -29,14 +40,14 @@ export default function CreateUserDialog({ isOpen, onClose, onUserCreated }) {
         setError(null)
 
         try {
-            
+
             const { data: { session } } = await supabase.auth.getSession()
 
             if (!session) {
                 throw new Error('Not authenticated')
             }
 
-            
+
             const response = await fetch('http://localhost:5000/api/users/create', {
                 method: 'POST',
                 headers: {
@@ -52,10 +63,10 @@ export default function CreateUserDialog({ isOpen, onClose, onUserCreated }) {
                 throw new Error(data.error || 'Failed to create user')
             }
 
-            
+
             alert(`User created successfully! Email: ${formData.email}`)
 
-            
+
             setFormData({
                 name: "",
                 email: "",
@@ -64,12 +75,12 @@ export default function CreateUserDialog({ isOpen, onClose, onUserCreated }) {
                 role: ROLES.PASSENGER
             })
 
-            
+
             if (onUserCreated) {
                 onUserCreated(data.user)
             }
 
-            
+
             onClose()
         } catch (err) {
             setError(err.message)
@@ -83,7 +94,7 @@ export default function CreateUserDialog({ isOpen, onClose, onUserCreated }) {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-                {}
+                { }
                 <div className="flex items-center justify-between p-6 border-b border-gray-100">
                     <div className="flex items-center gap-3">
                         <div className="bg-purple-100 p-2 rounded-lg">
@@ -102,7 +113,7 @@ export default function CreateUserDialog({ isOpen, onClose, onUserCreated }) {
                     </button>
                 </div>
 
-                {}
+                { }
                 <form onSubmit={handleSubmit} className="p-6 space-y-5">
                     <div className="space-y-2">
                         <Label htmlFor="name">Full Name</Label>

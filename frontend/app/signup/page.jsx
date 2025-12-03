@@ -10,6 +10,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
 
+/**
+ * Signup Page Component
+ * Allows new users to register for an account.
+ * Collects user details including student ID for verification.
+ * 
+ * @component
+ * @returns {JSX.Element} The rendered signup page
+ */
 export default function SignupPage() {
     const router = useRouter()
     const [formData, setFormData] = useState({
@@ -23,7 +31,7 @@ export default function SignupPage() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
 
-    
+
     useEffect(() => {
         const checkUser = async () => {
             const { data: { session } } = await supabase.auth.getSession()
@@ -61,12 +69,12 @@ export default function SignupPage() {
                 throw error
             }
 
-            
+
             if (data.session) {
                 alert("Signup successful! Logging you in...")
                 router.push("/dashboard")
             } else {
-                
+
                 alert("Signup successful! Please check your email for verification.")
                 router.push("/")
             }

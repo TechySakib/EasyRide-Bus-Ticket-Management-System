@@ -1,0 +1,13 @@
+[
+  {
+    "id": 1,
+    "name": "himi",
+    "email": "himi@northsouth.edu",
+    "phone": null,
+    "password_hash": "managed_by_supabase_auth",
+    "role": "admin",
+    "is_active": true,
+    "created_at": "2025-12-01T20:34:11.28789+00:00",
+    "updated_at": "2025-12-01T20:34:11.28789+00:00"
+  }
+]
