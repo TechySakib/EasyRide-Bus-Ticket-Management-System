@@ -115,13 +115,14 @@ export default function ScanPage() {
             }
 
             // Call the backend API to validate the ticket
+            console.log("Sending validation request with:", { qr_code_data: decodedText });
             const response = await fetch('http://localhost:5000/api/tickets/validate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${session.access_token}`
                 },
-                body: JSON.stringify({ qrCode: decodedText })
+                body: JSON.stringify({ qr_code_data: decodedText })
             })
 
             const data = await response.json()

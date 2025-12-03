@@ -18,48 +18,64 @@ import { AlertCircle, CheckCircle2, RefreshCw } from "lucide-react"
  */
 export default function QRScanner({ onScan, onError }) {
     const [scanResult, setScanResult] = useState(null)
+    const [scanError, setScanError] = useState(null)
     const scannerRef = useRef(null)
 
     useEffect(() => {
-        // Initialize scanner only once
-        if (!scannerRef.current) {
-            const scanner = new Html5QrcodeScanner(
-                "reader",
-                {
-                    fps: 10,
-                    qrbox: { width: 250, height: 250 },
-                    aspectRatio: 1.0,
-                },
-                /* verbose= */ false
-            )
+        // Initialize scanner
+        const scannerId = "reader";
 
-            scanner.render(
-                (decodedText) => {
-                    scanner.clear()
-                    setScanResult(decodedText)
-                    onScan(decodedText)
-                },
-                (errorMessage) => {
-                    // Ignore errors during scanning (e.g. no QR found in frame)
-                    if (onError) onError(errorMessage)
+        // Small delay to ensure DOM is ready
+        const timer = setTimeout(() => {
+            if (!scannerRef.current) {
+                try {
+                    const scanner = new Html5QrcodeScanner(
+                        scannerId,
+                        {
+                            fps: 10,
+                            qrbox: { width: 250, height: 250 },
+                            aspectRatio: 1.0,
+                        },
+                        /* verbose= */ false
+                    )
+
+                    scanner.render(
+                        (decodedText) => {
+                            console.log("QRScanner scanned:", decodedText);
+                            scanner.clear()
+                            setScanResult(decodedText)
+                            onScan(decodedText)
+                        },
+                        (errorMessage) => {
+                            // Ignore errors during scanning (e.g. no QR found in frame)
+                            // Only report critical errors if needed, but usually we ignore frame errors
+                        }
+                    )
+
+                    scannerRef.current = scanner
+                } catch (err) {
+                    console.error("Scanner initialization error:", err)
+                    setScanError("Failed to access camera. Please ensure permissions are granted.")
+                    if (onError) onError(err)
                 }
-            )
-
-            scannerRef.current = scanner
-        }
+            }
+        }, 100);
 
         return () => {
+            clearTimeout(timer)
             if (scannerRef.current) {
                 scannerRef.current.clear().catch(error => {
                     console.error("Failed to clear scanner", error)
                 })
+                scannerRef.current = null
             }
         }
     }, [onScan, onError])
 
     const handleReset = () => {
         setScanResult(null)
-        window.location.reload() // Simple way to restart scanner for now
+        setScanError(null)
+        window.location.reload()
     }
 
     return (
@@ -69,8 +85,16 @@ export default function QRScanner({ onScan, onError }) {
                 <p className="text-gray-500 text-sm mt-1">Align the QR code within the frame</p>
             </div>
 
-            {!scanResult ? (
-                <div className="overflow-hidden rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 relative">
+            {scanError ? (
+                <div className="text-center py-8 bg-red-50 rounded-xl border border-red-100">
+                    <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-3" />
+                    <p className="text-red-600 font-medium px-4">{scanError}</p>
+                    <Button onClick={handleReset} className="mt-4 bg-red-600 hover:bg-red-700">
+                        Retry
+                    </Button>
+                </div>
+            ) : !scanResult ? (
+                <div className="overflow-hidden rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 relative min-h-[300px]">
                     <div id="reader" className="w-full h-full"></div>
                 </div>
             ) : (

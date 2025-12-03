@@ -20,6 +20,9 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANO
  * @param {Object} res - Express response object
  * @returns {Promise<void>} Sends a JSON response with ticket details or error message
  */
+const fs = require('fs');
+const path = require('path');
+
 exports.validateTicket = async (req, res) => {
     const { qr_code_data } = req.body;
 
@@ -31,7 +34,7 @@ exports.validateTicket = async (req, res) => {
         // 1. Check if QR code exists
         const { data: qrCode, error: qrError } = await supabase
             .from('easyride_qr_codes')
-            .select('*, easyride_bookings(*, easyride_users(name), easyride_bus_assignments(*, easyride_routes(name), easyride_buses(bus_number)))')
+            .select('*, easyride_bookings(*, profiles(full_name), easyride_bus_assignments(*, easyride_routes(name), easyride_buses(bus_number)))')
             .eq('qr_code_data', qr_code_data)
             .single();
 
@@ -54,16 +57,31 @@ exports.validateTicket = async (req, res) => {
             throw updateError;
         }
 
-        // 4. Return ticket details
+        // 4. Update booking status to 'completed'
+        const { error: bookingUpdateError } = await supabase
+            .from('easyride_bookings')
+            .update({ booking_status: 'completed' })
+            .eq('id', qrCode.booking_id);
+
+        if (bookingUpdateError) {
+            console.error('Error updating booking status:', bookingUpdateError);
+        }
+
+        // 5. Return ticket details
         const booking = qrCode.easyride_bookings;
+        const assignment = booking.easyride_bus_assignments;
+
         res.json({
             message: 'Ticket Validated Successfully',
-            passenger_name: booking.easyride_users.name,
-            route_name: booking.easyride_bus_assignments.easyride_routes.name,
-            bus_number: booking.easyride_bus_assignments.easyride_buses.bus_number,
-            seat_number: booking.seat_number,
-            journey_date: booking.journey_date,
-            booking_status: booking.booking_status
+            ticket: {
+                passenger_name: booking.profiles?.full_name || 'Unknown',
+                route_name: assignment?.easyride_routes?.name || 'Unknown Route',
+                bus_number: assignment?.easyride_buses?.bus_number || 'Unknown Bus',
+                seat_number: booking.seat_number,
+                booking_date: booking.journey_date,
+                departure_time: assignment?.departure_time,
+                status: 'completed'
+            }
         });
 
     } catch (error) {
@@ -86,13 +104,15 @@ exports.getUserBookings = async (req, res) => {
     try {
         const userId = req.user.id;
 
-        const { data: bookings, error } = await supabase
+        let { data: bookings, error } = await supabase
             .from('easyride_bookings')
             .select(`
                 id,
                 journey_date,
                 booking_status,
                 seat_number,
+                booking_reference,
+                passenger_id,
                 easyride_qr_codes (
                     qr_code_data
                 ),
@@ -113,7 +133,47 @@ exports.getUserBookings = async (req, res) => {
             throw error;
         }
 
-        res.json({ bookings });
+        // Check and generate QR codes if missing
+        const bookingsWithQr = await Promise.all(bookings.map(async (booking) => {
+            // Check if QR code exists (it might be an empty array or null depending on the join)
+            const hasQrCode = booking.easyride_qr_codes &&
+                (Array.isArray(booking.easyride_qr_codes) ? booking.easyride_qr_codes.length > 0 : true);
+
+            if (!hasQrCode) {
+                // Generate QR Data
+                const qrData = JSON.stringify({
+                    booking_ref: booking.booking_reference,
+                    passenger_id: booking.passenger_id
+                });
+
+                // Insert into DB
+                const { data: newQr, error: qrError } = await supabase
+                    .from('easyride_qr_codes')
+                    .insert([
+                        {
+                            booking_id: booking.id,
+                            qr_code_data: qrData,
+                            is_scanned: false
+                        }
+                    ])
+                    .select('qr_code_data')
+                    .single();
+
+                if (!qrError && newQr) {
+                    // Attach to booking object for response
+                    return {
+                        ...booking,
+                        easyride_qr_codes: [newQr] // Format as array to match existing structure
+                    };
+                } else {
+                    console.error('Error generating QR for booking:', booking.id, qrError);
+                    return booking;
+                }
+            }
+            return booking;
+        }));
+
+        res.json({ bookings: bookingsWithQr });
     } catch (error) {
         console.error('Error fetching user bookings:', error);
         res.status(500).json({ message: 'Failed to fetch bookings' });
