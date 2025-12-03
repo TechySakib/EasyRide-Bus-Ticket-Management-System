@@ -1,3 +1,9 @@
+/**
+ * User Routes
+ * Defines API endpoints for user management.
+ * @module routes/userRoutes
+ */
+
 const express = require('express');
 const { requireAdmin } = require('../middleware/roleMiddleware');
 const UserController = require('../controllers/userController');
@@ -35,5 +41,14 @@ router.post('/update-password', UserController.updatePassword);
  */
 router.post('/update-role', requireAdmin, UserController.updateRole);
 
-module.exports = router;
 
+/**
+ * Route to log user access to scan page.
+ * @name POST /api/users/log-access
+ * @function
+ * @memberof module:routes/userRoutes
+ * @inner
+ */
+router.post('/log-access', UserController.logAccess);
+
+module.exports = router;

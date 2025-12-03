@@ -12,6 +12,13 @@ import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast"
 import { supabase } from "@/lib/supabase"
 
+/**
+ * Create User Page Component
+ * A full-page form for admins to create new users.
+ * 
+ * @component
+ * @returns {JSX.Element} The rendered create user page
+ */
 export default function CreateUserPage() {
     const router = useRouter()
     const { toast } = useToast()

@@ -1,3 +1,9 @@
+/**
+ * EasyRide Backend Server
+ * Main entry point for the Express application.
+ * @module index
+ */
+
 require('dotenv').config({ path: '../.env' });
 const express = require('express');
 const cors = require('cors');
@@ -17,11 +23,21 @@ app.use(cors());
 app.use(express.json());
 
 
+/**
+ * Health check endpoint.
+ * @name GET /
+ * @function
+ */
 app.get('/', (req, res) => {
     res.send('Easy Ride Backend is running!');
 });
 
 
+/**
+ * Protected test route.
+ * @name GET /api/protected
+ * @function
+ */
 app.get('/api/protected', authMiddleware, (req, res) => {
     res.json({
         message: 'This is a protected route',

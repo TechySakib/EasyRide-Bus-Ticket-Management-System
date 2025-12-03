@@ -1,12 +1,11 @@
+/**
+ * Auth Middleware
+ * Handles JWT token verification using Supabase Auth.
+ * @module middleware/auth
+ */
+
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
-
-
-
-
-
-
-
 
 const supabaseUrl = process.env.SUPABASE_URL || 'https://arctidbknjjajstoitas.supabase.co';
 const supabaseKey = process.env.SUPABASE_ANON_KEY || 'sb_publishable_Qpg550_nF9GVcZA4CejHgA_79GIdXvk';
@@ -18,6 +17,8 @@ const supabase = createClient(supabaseUrl, supabaseKey);
  * Verifies the JWT token from the Authorization header using Supabase Auth.
  * Attaches the user object to the request if successful.
  * 
+ * @async
+ * @function authMiddleware
  * @param {Object} req - Express request object
  * @param {Object} req.headers - Request headers
  * @param {string} req.headers.authorization - Bearer token

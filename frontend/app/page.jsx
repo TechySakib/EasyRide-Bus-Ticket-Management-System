@@ -11,12 +11,13 @@ import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
 
 /**
- * Login Page
+ * Login Page Component
+ * The initial landing page for unauthenticated users.
  * Handles user authentication via email and password.
  * Redirects to dashboard upon successful login.
  * 
  * @component
- * @returns {JSX.Element} Login UI
+ * @returns {JSX.Element} The rendered login page
  */
 export default function LoginPage() {
     const router = useRouter()

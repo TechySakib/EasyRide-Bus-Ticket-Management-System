@@ -6,6 +6,17 @@ import { supabase } from "@/lib/supabase"
 import { getRoleLabel, getRoleColor } from "@/lib/roles"
 import UserDetailDialog from "./UserDetailDialog"
 
+/**
+ * User Management Dialog Component
+ * Displays a list of all users with search functionality.
+ * Allows admins to view user details and manage them.
+ * 
+ * @component
+ * @param {Object} props - Component props
+ * @param {boolean} props.isOpen - Controls the visibility of the dialog
+ * @param {Function} props.onClose - Callback function to close the dialog
+ * @returns {JSX.Element|null} The rendered dialog or null if not open
+ */
 export default function UserManagementDialog({ isOpen, onClose }) {
     const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(false)
@@ -87,19 +98,19 @@ export default function UserManagementDialog({ isOpen, onClose }) {
 
     return (
         <>
-            {}
+            { }
             <div
                 className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 animate-fadeIn"
                 onClick={onClose}
             />
 
-            {}
+            { }
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
                 <div
                     className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col pointer-events-auto animate-slideUp"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    {}
+                    { }
                     <div className="flex items-center justify-between p-6 border-b border-gray-200">
                         <div className="flex items-center gap-3">
                             <div className="bg-blue-100 p-2.5 rounded-lg">
@@ -118,7 +129,7 @@ export default function UserManagementDialog({ isOpen, onClose }) {
                         </button>
                     </div>
 
-                    {}
+                    { }
                     <div className="p-6 border-b border-gray-100">
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -135,7 +146,7 @@ export default function UserManagementDialog({ isOpen, onClose }) {
                         </div>
                     </div>
 
-                    {}
+                    { }
                     <div className="flex-1 overflow-auto p-6">
                         {loading ? (
                             <div className="flex flex-col items-center justify-center py-12">
@@ -243,7 +254,7 @@ export default function UserManagementDialog({ isOpen, onClose }) {
                         )}
                     </div>
 
-                    {}
+                    { }
                     <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
                         <div className="flex justify-between items-center">
                             <p className="text-sm text-gray-500">
@@ -260,7 +271,7 @@ export default function UserManagementDialog({ isOpen, onClose }) {
                 </div>
             </div>
 
-            {}
+            { }
             <UserDetailDialog
                 isOpen={!!selectedUser}
                 onClose={() => setSelectedUser(null)}

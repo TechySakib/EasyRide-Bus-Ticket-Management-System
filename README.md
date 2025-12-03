@@ -1,5 +1,10 @@
 # EasyRide AI Chatbot
 
+## Achieved Milestones
+- **Database setup**: Supabase(sql) integration for user data.
+- **QR Code Feature**: QR code generation for bookings and scanner for ticket validation.
+- **Role Based Access Control**: Only the passenger role can generate QR code and other roles can scan QR code.
+
 This branch (`chatbot`) implements a smart, context-aware AI assistant for the EasyRide Bus Ticket Management System.
 
 ## Features
