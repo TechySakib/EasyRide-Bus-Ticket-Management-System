@@ -155,6 +155,16 @@ export default function DashboardHeader() {
                                             <button
                                                 onClick={() => {
                                                     setShowUserMenu(false)
+                                                    router.push('/dashboard/scan')
+                                                }}
+                                                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                                            >
+                                                <QrCode className="h-4 w-4 text-gray-500" />
+                                                QR Code
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setShowUserMenu(false)
                                                     setShowPasswordDialog(true)
                                                 }}
                                                 className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"

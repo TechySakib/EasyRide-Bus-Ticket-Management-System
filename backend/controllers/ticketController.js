@@ -165,7 +165,7 @@ const TicketController = {
                         )
                     )
                 `)
-                .eq('passenger_id', dbUserId)
+                .eq('passenger_id', req.user.id)
                 .order('journey_date', { ascending: false })
                 .limit(5);
 
