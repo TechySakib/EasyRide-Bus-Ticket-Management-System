@@ -1,6 +1,6 @@
 const BusAssignmentModel = require('../models/busAssignmentModel');
 const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config();
+require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -54,15 +54,21 @@ const BusAssignmentController = {
 
             if (error) throw error;
 
+            console.log('🔍 Raw Auth Users Count:', data.users.length);
+
             const conductors = data.users
-                .filter(user => (user.user_metadata?.role || '').toLowerCase() === 'conductor')
+                .filter(user => {
+                    const role = (user.user_metadata?.role || '').toLowerCase();
+                    return role === 'conductor';
+                })
                 .map(user => ({
                     id: user.id,
-                    name: user.user_metadata?.full_name || user.email, // Fallback to email if name missing
+                    name: user.user_metadata?.full_name || user.email,
                     email: user.email,
                     role: user.user_metadata?.role
                 }));
 
+            console.log('Found conductors:', conductors.length);
             res.json(conductors);
         } catch (error) {
             console.error('Get conductors error:', error);
@@ -95,6 +101,7 @@ const BusAssignmentController = {
     createAssignment: async (req, res) => {
         try {
             const assignmentData = req.body;
+            console.log('📝 Creating assignment with data:', assignmentData);
             const newAssignment = await BusAssignmentModel.createAssignment(assignmentData);
             res.status(201).json({ message: 'Assignment created', assignment: newAssignment });
         } catch (error) {
@@ -119,12 +126,32 @@ const BusAssignmentController = {
             const assignments = await BusAssignmentModel.getAssignmentsByDate(date);
             console.log('Assignments fetched:', assignments?.length);
 
+            // Fetch all users to map conductor names (since we use UUIDs now)
+            const { data: authData, error: authError } = await supabaseAdmin.auth.admin.listUsers();
+            const userMap = new Map();
+            if (!authError && authData?.users) {
+                authData.users.forEach(u => {
+                    userMap.set(u.id, u.user_metadata?.full_name || u.email);
+                });
+            }
+
             // Merge data
             const fleetStatus = buses.map(bus => {
                 const assignment = assignments.find(a => a.bus_id === bus.id);
+
+                let enrichedAssignment = null;
+                if (assignment) {
+                    enrichedAssignment = {
+                        ...assignment,
+                        conductor: assignment.conductor_id ? {
+                            name: userMap.get(assignment.conductor_id) || 'Unknown'
+                        } : null
+                    };
+                }
+
                 return {
                     ...bus,
-                    assignment: assignment || null,
+                    assignment: enrichedAssignment,
                     status: assignment ? 'assigned' : 'available'
                 };
             });
@@ -135,7 +162,6 @@ const BusAssignmentController = {
             res.status(500).json({ error: 'Failed to fetch fleet status' });
         }
     },
-
 
     getConductorAssignments: async (req, res) => {
         try {

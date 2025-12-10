@@ -1,7 +1,0 @@
-[2025-12-02T11:28:16.134Z] Error: Could not find the 'destination_location' column of 'easyride_routes' in the schema cache
-Stack: undefined
-
-[DEBUG] Inspection failed: RouteModel.getAllRoutes is not a function
-[2025-12-02T11:30:24.786Z] Error: Could not find the 'destination_location' column of 'easyride_routes' in the schema cache
-Stack: undefined
-

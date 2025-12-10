@@ -10,6 +10,14 @@ import ManageAssignmentsDialog from "./ManageAssignmentsDialog"
 import AdminTicketPanel from "./AdminTicketPanel"
 import RechargeRequestsDialog from "./RechargeRequestsDialog"
 
+/**
+ * Admin Panel Component
+ * Provides a dropdown menu with administrative actions like creating users and managing users.
+ * Only visible to users with Admin role.
+ * 
+ * @component
+ * @returns {JSX.Element} The rendered admin panel component
+ */
 export default function AdminPanel() {
     const router = useRouter()
     const [isOpen, setIsOpen] = useState(false)

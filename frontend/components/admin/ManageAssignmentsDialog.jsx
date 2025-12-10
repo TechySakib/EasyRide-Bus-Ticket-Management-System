@@ -16,17 +16,21 @@ export default function ManageAssignmentsDialog({ isOpen, onClose }) {
 
     // Assignment Form State
     const [assigningBusId, setAssigningBusId] = useState(null)
-    const [routes, setRoutes] = useState([])
-    const [drivers, setDrivers] = useState([])
+    const [locations, setLocations] = useState([])
     const [conductors, setConductors] = useState([])
     const [formData, setFormData] = useState({
-        route_id: "",
-        driver_id: "",
+        location_id: "",
         conductor_id: "",
-        departure_time: "",
-        arrival_time: ""
+        time_slot: ""
     })
     const [submitting, setSubmitting] = useState(false)
+
+    // Define time slots
+    const timeSlots = [
+        { id: "morning", label: "Morning (08:00 - 10:00)", departure: "08:00", arrival: "10:00" },
+        { id: "afternoon", label: "Afternoon (14:00 - 16:00)", departure: "14:00", arrival: "16:00" },
+        { id: "evening", label: "Evening (18:00 - 20:00)", departure: "18:00", arrival: "20:00" }
+    ]
 
     useEffect(() => {
         if (isOpen) {
@@ -38,16 +42,27 @@ export default function ManageAssignmentsDialog({ isOpen, onClose }) {
     const fetchFleetStatus = async () => {
         setLoading(true)
         try {
+            console.log('🔍 Fetching fleet status for date:', selectedDate)
             const { data: { session } } = await supabase.auth.getSession()
-            if (!session) return
+            if (!session) {
+                console.warn('⚠️ No session found')
+                return
+            }
 
             const response = await fetch(`http://localhost:5000/api/assignments/fleet-status?date=${selectedDate}`, {
                 headers: { 'Authorization': `Bearer ${session.access_token}` }
             })
 
+            console.log('📡 Response status:', response.status, response.ok)
+
             if (response.ok) {
                 const data = await response.json()
+                console.log('✅ Fleet data received:', data)
+                console.log('📊 Number of buses:', data?.length)
                 setFleetStatus(data)
+            } else {
+                const errorText = await response.text()
+                console.error('❌ API Error:', response.status, errorText)
             }
         } catch (error) {
             console.error("Failed to fetch fleet status", error)
@@ -66,22 +81,13 @@ export default function ManageAssignmentsDialog({ isOpen, onClose }) {
             const { data: { session } } = await supabase.auth.getSession()
             if (!session) return
 
-            // Fetch routes
-            const { data: routesData } = await supabase
-                .from('easyride_routes')
+            // Fetch locations
+            const { data: locationsData } = await supabase
+                .from('locations')
                 .select('id, name')
                 .order('name')
 
-            if (routesData) setRoutes(routesData)
-
-            // Fetch drivers via API
-            const driversRes = await fetch('http://localhost:5000/api/assignments/drivers', {
-                headers: { 'Authorization': `Bearer ${session.access_token}` }
-            })
-            if (driversRes.ok) {
-                const driversData = await driversRes.json()
-                setDrivers(driversData)
-            }
+            if (locationsData) setLocations(locationsData)
 
             // Fetch conductors via API
             const conductorsRes = await fetch('http://localhost:5000/api/assignments/conductors', {
@@ -100,11 +106,9 @@ export default function ManageAssignmentsDialog({ isOpen, onClose }) {
     const handleAssignClick = (busId) => {
         setAssigningBusId(busId)
         setFormData({
-            route_id: "",
-            driver_id: "",
+            location_id: "",
             conductor_id: "",
-            departure_time: "08:00",
-            arrival_time: "10:00"
+            time_slot: ""
         })
     }
 
@@ -114,17 +118,26 @@ export default function ManageAssignmentsDialog({ isOpen, onClose }) {
         try {
             const { data: { session } } = await supabase.auth.getSession()
 
-            // Construct timestamps
-            const departure = `${selectedDate}T${formData.departure_time}:00`
-            const arrival = `${selectedDate}T${formData.arrival_time}:00`
+            // Get selected time slot
+            const selectedSlot = timeSlots.find(slot => slot.id === formData.time_slot)
+            if (!selectedSlot) {
+                toast({
+                    title: "Error",
+                    description: "Please select a time slot",
+                    variant: "destructive"
+                })
+                setSubmitting(false)
+                return
+            }
 
+            // Construct payload
             const payload = {
                 bus_id: assigningBusId,
-                route_id: formData.route_id,
-                driver_id: formData.driver_id,
+                location_id: formData.location_id,
                 conductor_id: formData.conductor_id || null,
-                departure_time: departure,
-                arrival_time: arrival,
+                assignment_date: selectedDate,
+                departure_time: selectedSlot.departure,
+                arrival_time: selectedSlot.arrival,
                 status: 'scheduled'
             }
 
@@ -246,12 +259,8 @@ export default function ManageAssignmentsDialog({ isOpen, onClose }) {
                                                 <div className="col-span-3">
                                                     {item.assignment ? (
                                                         <div className="space-y-1">
-                                                            <div className="text-sm font-medium text-gray-900">{item.assignment.easyride_routes?.name}</div>
+                                                            <div className="text-sm font-medium text-gray-900">{item.assignment.locations?.name || 'Unknown Location'}</div>
                                                             <div className="text-xs text-gray-500 flex flex-col gap-1">
-                                                                <div className="flex items-center gap-1">
-                                                                    <User className="h-3 w-3" />
-                                                                    Dr: {item.assignment.driver?.name}
-                                                                </div>
                                                                 <div className="flex items-center gap-1 text-blue-600">
                                                                     <User className="h-3 w-3" />
                                                                     Cd: {item.assignment.conductor?.name || 'None'}
@@ -269,10 +278,10 @@ export default function ManageAssignmentsDialog({ isOpen, onClose }) {
                                                         <div className="space-y-1">
                                                             <div className="text-sm text-gray-900 flex items-center gap-1">
                                                                 <Clock className="h-3 w-3 text-gray-400" />
-                                                                {new Date(item.assignment.departure_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                {item.assignment.departure_time?.slice(0, 5)}
                                                             </div>
                                                             <div className="text-xs text-gray-500">
-                                                                Arrive: {new Date(item.assignment.arrival_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                Arrive: {item.assignment.arrival_time?.slice(0, 5)}
                                                             </div>
                                                         </div>
                                                     ) : (
@@ -313,33 +322,21 @@ export default function ManageAssignmentsDialog({ isOpen, onClose }) {
                                             {/* Assignment Form */}
                                             {assigningBusId === item.id && (
                                                 <div className="mt-4 pt-4 border-t border-gray-100 bg-gray-50/50 rounded-lg p-4">
-                                                    <form onSubmit={handleCreateAssignment} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                                                    <form onSubmit={handleCreateAssignment} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                                                         <div className="space-y-1">
-                                                            <label className="text-xs font-medium text-gray-500">Route</label>
+                                                            <label className="text-xs font-medium text-gray-500">Location</label>
                                                             <select
                                                                 required
                                                                 className="w-full h-9 rounded-md border border-gray-200 text-sm"
-                                                                value={formData.route_id}
-                                                                onChange={(e) => setFormData({ ...formData, route_id: e.target.value })}
+                                                                value={formData.location_id}
+                                                                onChange={(e) => setFormData({ ...formData, location_id: e.target.value })}
                                                             >
-                                                                <option value="">Select Route</option>
-                                                                {routes.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+                                                                <option value="">Select Location</option>
+                                                                {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                                                             </select>
                                                         </div>
                                                         <div className="space-y-1">
-                                                            <label className="text-xs font-medium text-gray-500">Driver</label>
-                                                            <select
-                                                                required
-                                                                className="w-full h-9 rounded-md border border-gray-200 text-sm"
-                                                                value={formData.driver_id}
-                                                                onChange={(e) => setFormData({ ...formData, driver_id: e.target.value })}
-                                                            >
-                                                                <option value="">Select Driver</option>
-                                                                {drivers.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-                                                            </select>
-                                                        </div>
-                                                        <div className="space-y-1">
-                                                            <label className="text-xs font-medium text-gray-500">Conductor (Opt)</label>
+                                                            <label className="text-xs font-medium text-gray-500">Conductor</label>
                                                             <select
                                                                 className="w-full h-9 rounded-md border border-gray-200 text-sm"
                                                                 value={formData.conductor_id}
@@ -349,24 +346,18 @@ export default function ManageAssignmentsDialog({ isOpen, onClose }) {
                                                                 {conductors.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                                             </select>
                                                         </div>
+
                                                         <div className="space-y-1">
-                                                            <label className="text-xs font-medium text-gray-500">Times</label>
-                                                            <div className="flex gap-2">
-                                                                <Input
-                                                                    type="time"
-                                                                    required
-                                                                    className="h-9"
-                                                                    value={formData.departure_time}
-                                                                    onChange={(e) => setFormData({ ...formData, departure_time: e.target.value })}
-                                                                />
-                                                                <Input
-                                                                    type="time"
-                                                                    required
-                                                                    className="h-9"
-                                                                    value={formData.arrival_time}
-                                                                    onChange={(e) => setFormData({ ...formData, arrival_time: e.target.value })}
-                                                                />
-                                                            </div>
+                                                            <label className="text-xs font-medium text-gray-500">Time Slot</label>
+                                                            <select
+                                                                required
+                                                                className="w-full h-9 rounded-md border border-gray-200 text-sm"
+                                                                value={formData.time_slot}
+                                                                onChange={(e) => setFormData({ ...formData, time_slot: e.target.value })}
+                                                            >
+                                                                <option value="">Select Time Slot</option>
+                                                                {timeSlots.map(slot => <option key={slot.id} value={slot.id}>{slot.label}</option>)}
+                                                            </select>
                                                         </div>
                                                         <Button type="submit" disabled={submitting} className="h-9 bg-blue-600 hover:bg-blue-700 text-white">
                                                             {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Plus className="h-4 w-4 mr-1" /> Assign</>}

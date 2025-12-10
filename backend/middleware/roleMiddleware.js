@@ -1,21 +1,37 @@
+/**
+ * Role Middleware
+ * Handles role-based access control.
+ * @module middleware/roleMiddleware
+ */
+
 const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config();
+require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
 
 const supabaseUrl = process.env.SUPABASE_URL || 'https://arctidbknjjajstoitas.supabase.co';
 const supabaseKey = process.env.SUPABASE_ANON_KEY || 'sb_publishable_Qpg550_nF9GVcZA4CejHgA_79GIdXvk';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-
+/**
+ * User Roles Enum
+ * @readonly
+ * @enum {string}
+ */
 const ROLES = {
     PASSENGER: 'passenger',
     ADMIN: 'admin',
     CONDUCTOR: 'conductor',
-    
     STUDENT: 'student'
 };
 
 
+/**
+ * Normalizes user roles (e.g., maps 'student' to 'passenger').
+ * 
+ * @function normalizeRole
+ * @param {string} role - The role to normalize
+ * @returns {string} Normalized role
+ */
 const normalizeRole = (role) => {
     if (role === ROLES.STUDENT) {
         return ROLES.PASSENGER;
@@ -24,10 +40,17 @@ const normalizeRole = (role) => {
 };
 
 
+/**
+ * Middleware factory to restrict access based on user roles.
+ * 
+ * @function requireRole
+ * @param {string|string[]} allowedRoles - Single role or array of allowed roles
+ * @returns {Function} Express middleware function
+ */
 const requireRole = (allowedRoles) => {
     return async (req, res, next) => {
         try {
-            
+
             const authHeader = req.headers.authorization;
 
             if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -36,7 +59,7 @@ const requireRole = (allowedRoles) => {
 
             const token = authHeader.split(' ')[1];
 
-            
+
             const { data: { user }, error } = await supabase.auth.getUser(token);
 
             if (error || !user) {
@@ -44,7 +67,7 @@ const requireRole = (allowedRoles) => {
                 return res.status(401).json({ error: 'Invalid or expired token' });
             }
 
-            
+
             const { data: profile, error: profileError } = await supabase
                 .from('profiles')
                 .select('role')
@@ -56,17 +79,17 @@ const requireRole = (allowedRoles) => {
             if (profile && profile.role) {
                 userRole = normalizeRole(profile.role);
             } else {
-                
+
                 console.warn(`Profile not found for user ${user.id}, falling back to metadata`);
                 userRole = normalizeRole(user.user_metadata?.role || ROLES.PASSENGER);
             }
 
-            
+
             const rolesArray = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
 
             console.log(`[Middleware] User: ${user.email}, Role: ${userRole}, Required: ${rolesArray}`);
 
-            
+
             if (!rolesArray.includes(userRole)) {
                 return res.status(403).json({
                     error: 'Insufficient permissions',
@@ -75,7 +98,7 @@ const requireRole = (allowedRoles) => {
                 });
             }
 
-            
+
             req.user = user;
             req.userRole = userRole;
             next();
@@ -87,12 +110,24 @@ const requireRole = (allowedRoles) => {
 };
 
 
+/**
+ * Middleware requiring Admin role.
+ * @constant
+ */
 const requireAdmin = requireRole(ROLES.ADMIN);
 
 
+/**
+ * Middleware requiring Admin or Conductor role.
+ * @constant
+ */
 const requireAdminOrConductor = requireRole([ROLES.ADMIN, ROLES.CONDUCTOR]);
 
 
+/**
+ * Middleware requiring any valid role (Passenger, Admin, Conductor).
+ * @constant
+ */
 const requireAnyRole = requireRole([ROLES.PASSENGER, ROLES.ADMIN, ROLES.CONDUCTOR]);
 
 module.exports = {

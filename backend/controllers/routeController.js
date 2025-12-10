@@ -1,7 +1,23 @@
 const RouteModel = require('../models/routeModel');
+require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
 const fs = require('fs');
+const path = require('path');
 
+/**
+ * Route Controller
+ * Handles route creation and management logic.
+ */
 const RouteController = {
+    /**
+     * Creates routes between a specified location and the campus.
+     * Ensures locations exist and creates bidirectional routes if they don't exist.
+     * 
+     * @param {Object} req - Express request object
+     * @param {Object} req.body - Request body
+     * @param {string} req.body.locationName - Name of the location to connect with campus
+     * @param {Object} res - Express response object
+     * @returns {Promise<void>} Sends JSON response with created routes or error
+     */
     createRouteFromLocation: async (req, res) => {
         try {
             const { locationName } = req.body;

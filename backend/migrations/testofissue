@@ -1,0 +1,11 @@
+PASS  test/reportIssue.test.js
+  TicketController.createTicket
+    √ should return 401 if user email is missing (2 ms)
+    √ should create a ticket successfully for an existing user (1 ms)
+    √ should create a new user and ticket if user does not exist (1 ms)
+    √ should handle errors during ticket creation (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        1.156 s
