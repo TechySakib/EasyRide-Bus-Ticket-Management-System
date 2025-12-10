@@ -43,7 +43,7 @@ const rechargeController = {
             const { amount, paymentMethod, phoneNumber, transactionId } = req.body;
             const userId = req.user.id;
 
-            // Validation
+            // Validationnn
             if (!amount || !paymentMethod || !phoneNumber || !transactionId) {
                 return res.status(400).json({
                     success: false,
