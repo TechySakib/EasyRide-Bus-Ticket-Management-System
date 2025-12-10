@@ -32,6 +32,9 @@ const ticketRoutes = require('./routes/ticketRoutes');
 app.use('/api/tickets', ticketRoutes);
 const busAssignmentRoutes = require('./routes/busAssignmentRoutes');
 app.use('/api/assignments', busAssignmentRoutes);
+const rechargeRoutes = require('./routes/rechargeRoutes');
+app.use('/api/recharge', rechargeRoutes);
+
 
 
 app.listen(port, () => {

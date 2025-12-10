@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "jest tests/"
   },
   "keywords": [],
   "author": "",
@@ -16,5 +18,8 @@
     "express": "^5.2.1",
     "multer": "^2.0.2",
     "nodemon": "^3.1.11"
+  },
+  "devDependencies": {
+    "jest": "^30.2.0"
   }
 }

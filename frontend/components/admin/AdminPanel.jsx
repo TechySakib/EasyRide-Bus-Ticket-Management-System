@@ -2,12 +2,13 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { UserCog, UserPlus, Users, BarChart3, ChevronDown, UsersRound, MapPin, Bus } from "lucide-react"
+import { UserCog, UserPlus, Users, BarChart3, ChevronDown, UsersRound, MapPin, Bus, Wallet } from "lucide-react"
 import CreateUserDialog from "./CreateUserDialog"
 import CreateRouteDialog from "./CreateRouteDialog"
 import UserManagementDialog from "./UserManagementDialog"
 import ManageAssignmentsDialog from "./ManageAssignmentsDialog"
 import AdminTicketPanel from "./AdminTicketPanel"
+import RechargeRequestsDialog from "./RechargeRequestsDialog"
 
 export default function AdminPanel() {
     const router = useRouter()
@@ -17,6 +18,7 @@ export default function AdminPanel() {
     const [showUserManagement, setShowUserManagement] = useState(false)
     const [showTicketsPanel, setShowTicketsPanel] = useState(false)
     const [showAssignmentsDialog, setShowAssignmentsDialog] = useState(false)
+    const [showRechargeRequests, setShowRechargeRequests] = useState(false)
 
     return (
         <>
@@ -123,6 +125,22 @@ export default function AdminPanel() {
 
                                 <button
                                     onClick={() => {
+                                        setShowRechargeRequests(true)
+                                        setIsOpen(false)
+                                    }}
+                                    className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-green-50 rounded-lg transition-colors group"
+                                >
+                                    <div className="bg-green-100 p-2 rounded-lg group-hover:bg-green-200 transition-colors">
+                                        <Wallet className="h-5 w-5 text-green-600" />
+                                    </div>
+                                    <div>
+                                        <div className="font-medium text-gray-900">Recharge Requests</div>
+                                        <div className="text-xs text-gray-500">Approve wallet recharges</div>
+                                    </div>
+                                </button>
+
+                                <button
+                                    onClick={() => {
                                         setShowTicketsPanel(true)
                                         setIsOpen(false)
                                     }}
@@ -170,6 +188,12 @@ export default function AdminPanel() {
             <UserManagementDialog
                 isOpen={showUserManagement}
                 onClose={() => setShowUserManagement(false)}
+            />
+
+            {/* Recharge Requests Dialog */}
+            <RechargeRequestsDialog
+                isOpen={showRechargeRequests}
+                onClose={() => setShowRechargeRequests(false)}
             />
 
             {/* Admin Ticket Panel */}
